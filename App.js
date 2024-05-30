@@ -1,59 +1,47 @@
-import { useState } from "react";
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Button, TextInput, ScrollView, FlatList } from "react-native";
-import GoalItem from "./components/GoalItem";
-import GoalInput from "./components/GoalInput";
+import React, { useEffect, useState } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import OnboardingScreen from './screens/OnboardingScreen';
+import LoginScreen from './screens/LoginScreen';
 
-export default function App() {
-    const [courseGoals, setCourseGoals] = useState([]);
+const AppStack = createStackNavigator();
 
-  function addGoalHandler(enteredGoalText) {
-    setCourseGoals((currentCourseGoals) => [
-      ...currentCourseGoals,
-      {text: enteredGoalText, id: Math.random().toString()}, 
-    ]);
-  }
-  function deleteGoalHandler(iD) {
-    setCourseGoals((currentCourseGoals) => {
-      return currentCourseGoals.filter(item => item.id !== iD);
-    }
-  )
-  }
+const App = () => {
+  const [isFirstLaunch, setIsFirstLaunch] = useState(null);
 
-  return (
-    <View style={styles.appContainer}>
-      <GoalInput onAddGoal = {addGoalHandler}/>
-      <View style={styles.goalsContainer}>
-      <FlatList 
-      data ={courseGoals}
-      renderItem={(itemData) => {
-        return (
-        <GoalItem 
-        text = {itemData.item.text}
-        id = {itemData.item.id}
-        onDeleteItem = {deleteGoalHandler}/>) 
+  useEffect(() => {
+    AsyncStorage.getItem('alreadyLaunched').then(value => {
+      if(value === null) {
+        AsyncStorage.setItem('alreadyLaunched', 'true');
+        setIsFirstLaunch(true);
+      } else {
+        setIsFirstLaunch(false);
       }
-      }
-      keyExtractor={(item, index) => item.id}
-      alwaysBounceVertical = {false}/>
-      </View>
-    </View>
-  );
-}
+    });
+  }, []);
 
-const styles = StyleSheet.create({
-  
-  appContainer: {
-    backgroundColor: "#ffffff",
-    paddingTop: 50,
-    paddingHorizontal: 16,
-    flex: 1,
-  },
-  goalsContainer: {
-    flex: 5,
-  },
-  
-  goalText: {
-    color: "white",
+  if (isFirstLaunch === null) {
+    return null; // Render nothing while loading
+  } else if (isFirstLaunch === true) {
+    return (
+      <NavigationContainer>
+        <AppStack.Navigator headerMode="none">
+          <AppStack.Screen name="Onboarding" component={OnboardingScreen} />
+          <AppStack.Screen name="Login" component={LoginScreen} />
+        </AppStack.Navigator>
+      </NavigationContainer>
+    );
+  } else {
+    return (
+      <NavigationContainer>
+        <AppStack.Navigator headerMode="none">
+          <AppStack.Screen name="Login" component={LoginScreen} />
+        </AppStack.Navigator>
+      </NavigationContainer>
+    );
   }
-});
+};
+
+export default App;
+
