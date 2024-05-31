@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import OnboardingScreen from './screens/OnboardingScreen';
-import LoginScreen from './screens/LoginScreen';
+import OnboardingScreen from './components/OnboardingScreen';
+import LoginScreen from './components/LoginScreen';
 
 const AppStack = createStackNavigator();
 
