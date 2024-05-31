@@ -26,7 +26,7 @@ const App = () => {
   } else if (isFirstLaunch === true) {
     return (
       <NavigationContainer>
-        <AppStack.Navigator headerMode="none">
+        <AppStack.Navigator screenOptions={{ headerShown: false }}>
           <AppStack.Screen name="Onboarding" component={OnboardingScreen} />
           <AppStack.Screen name="Login" component={LoginScreen} />
         </AppStack.Navigator>
@@ -35,7 +35,7 @@ const App = () => {
   } else {
     return (
       <NavigationContainer>
-        <AppStack.Navigator headerMode="none">
+        <AppStack.Navigator screenOptions={{ headerShown: false }}>
           <AppStack.Screen name="Login" component={LoginScreen} />
         </AppStack.Navigator>
       </NavigationContainer>
