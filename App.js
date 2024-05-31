@@ -11,6 +11,12 @@ const App = () => {
   const [isFirstLaunch, setIsFirstLaunch] = useState(null);
 
   useEffect(() => {
+
+// Uncomment the next two lines if you want to reset the launch status each time for testing
+    AsyncStorage.removeItem('alreadyLaunched').then(() => {
+      console.log('Removed alreadyLaunched item for testing purposes.');
+    });
+
     AsyncStorage.getItem('alreadyLaunched').then(value => {
       if(value === null) {
         AsyncStorage.setItem('alreadyLaunched', 'true');

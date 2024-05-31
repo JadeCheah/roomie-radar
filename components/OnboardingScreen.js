@@ -9,14 +9,14 @@ const OnboardingScreen = ({navigation}) => {
         pages={[
             {
                 backgroundColor: '#fff',
-                image: <Image source={require('../assets/icon.png')} />,
-                title: 'Onboarding',
+                image: <Image source={require('../assets/onboarding.webp')} />,
+                title: 'Onboarding 1',
                 subtitle: 'Done with React Native Onboarding Swiper',
             },
             {
                 backgroundColor: '#fff',
                 image: <Image source={require('../assets/icon.png')} />,
-                title: 'Onboarding',
+                title: 'Onboarding 2',
                 subtitle: 'Done with React Native Onboarding Swiper',
             },
         ]}
