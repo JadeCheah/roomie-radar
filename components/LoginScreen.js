@@ -7,7 +7,7 @@ const LoginScreen = () =>  {
       <Text>Login screen</Text>
       <Button
       title ='Click here'
-      onPress={() => alert('Button clicked!')}
+      onPress={() => alert('hi missus!')}
       />
     </View>
   );
