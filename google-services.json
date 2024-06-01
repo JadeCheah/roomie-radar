@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1038476881740",
+    "project_id": "roomieradar-438be",
+    "storage_bucket": "roomieradar-438be.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1038476881740:android:9107dedd00a1a9788969e9",
+        "android_client_info": {
+          "package_name": "com.RoomieRadar"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3sqptyJcfv-OXgGQW0tOu104wK8Wz4eU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
