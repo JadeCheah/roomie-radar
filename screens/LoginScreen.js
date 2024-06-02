@@ -1,13 +1,29 @@
-import React, {useState} from "react";
+import React, {useContext, useState} from "react";
 import { StyleSheet, TouchableOpacity, Image, View, Text } from "react-native";
 import FormInput from '../components/FormInput';
 import FormButton from '../components/FormButton';
 import SocialButton from '../components/SocialButton';
+//import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import {AuthContext} from '../navigation/AuthProvider';
 
 const LoginScreen = ({navigation}) =>  {
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
+
+  const {login} = useContext(AuthContext);
   
+  // const login = () => {
+  //   signInWithEmailAndPassword(auth, email, password)
+  //     .then(async (userCredential) => {
+  //       // Signed in
+  //       const user = userCredential.user;
+  //       onChangeLoggedInUser(user.email);
+  //     })
+  //     .catch((error) => {
+  //       const errorCode = error.code;
+  //       const errorMessage = error.message;
+  //     });
+  // };
 
   return (
     <View style = {styles.container}>
@@ -33,7 +49,7 @@ const LoginScreen = ({navigation}) =>  {
       />
       <FormButton
         buttonTitle="Sign In"
-        onPress={() => alert('Sign In Clicked!')}
+        onPress={() => login(email, password)}
       />
       <TouchableOpacity 
         style={styles.forgotButton} 
