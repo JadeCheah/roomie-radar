@@ -3,12 +3,8 @@ import { StyleSheet, TouchableOpacity, Image, View, Text } from "react-native";
 import FormInput from '../components/FormInput';
 import FormButton from '../components/FormButton';
 import SocialButton from '../components/SocialButton';
-<<<<<<< HEAD
-import { AuthContext } from '../navigation/AuthProvider';
-=======
 //import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import {AuthContext} from '../navigation/AuthProvider';
->>>>>>> branch_3
 
 const LoginScreen = ({navigation}) =>  {
   const [email, setEmail] = useState();
@@ -16,9 +12,6 @@ const LoginScreen = ({navigation}) =>  {
 
   const {login} = useContext(AuthContext);
   
-<<<<<<< HEAD
-  const {login} = useContext(AuthContext);
-=======
   // const login = () => {
   //   signInWithEmailAndPassword(auth, email, password)
   //     .then(async (userCredential) => {
@@ -31,7 +24,6 @@ const LoginScreen = ({navigation}) =>  {
   //       const errorMessage = error.message;
   //     });
   // };
->>>>>>> branch_3
 
   return (
     <View style = {styles.container}>
@@ -64,6 +56,7 @@ const LoginScreen = ({navigation}) =>  {
         onPress={() => {}}>
         <Text style={styles.navButtonText}>Forgot Password?</Text>
       </TouchableOpacity>
+      
       <SocialButton
         buttonTitle="Sign In with Facebook"
         buttonType="facebook"
