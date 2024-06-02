@@ -6,10 +6,10 @@ const Stack = createStackNavigator();
 
 const AppStack = () => {
     return (
-        <Stack.Navigator>
+        <Stack.Navigator initialRouteName = "Home">
             <Stack.Screen name='Home' component={HomeScreen} />
         </Stack.Navigator>
     );
-};
+}
 
 export default AppStack;
