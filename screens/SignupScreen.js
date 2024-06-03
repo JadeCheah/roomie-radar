@@ -35,7 +35,7 @@ const SignupScreen = ({navigation}) => {
                 onPress={() => register(email, password)}
             />
 
-            <SocialButton
+            {/* <SocialButton
                 buttonTitle="Sign Up with Facebook"
                 buttonType="facebook"
                 color="#4867aa"
@@ -48,7 +48,7 @@ const SignupScreen = ({navigation}) => {
                 color="#de4d41"
                 backgroundColor="#f5e7ea"
                 onPress={() => {}}
-            />
+            /> */}
         </View>
     );
 };

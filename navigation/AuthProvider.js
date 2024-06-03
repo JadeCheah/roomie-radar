@@ -19,16 +19,6 @@ export const AuthProvider = ({children}) => {
                     } catch(e) {
                         console.log(e);
                     }
-                    // signInWithEmailAndPassword(auth, email, password)
-                    // .then((userCredential) => {
-                    //     //Signed in
-                    //     const user = userCredential.user;
-                    //     setUser(user);
-                    // })
-                    // .catch((error) => {
-                    //     const errorCode = error.code;
-                    //     const errorMessage = error.message;
-                    // });
                 },
                 register: async (email, password) => {
                     try {
@@ -36,16 +26,7 @@ export const AuthProvider = ({children}) => {
                     } catch (e) {
                         console.log(e);
                     }
-                    // createUserWithEmailAndPassword(auth, email, password)
-                    // .then((userCredential) => {
-                    //     //Signed up
-                    //     const user = userCredential.user;
-                    //     setUser(user);
-                    // })
-                    // .catch((error) => {
-                    //     const errorCode = error.code;
-                    //     const errorMessage = error.message;
-                    // });
+               
                 },
                 logout: async () => {
                     try {

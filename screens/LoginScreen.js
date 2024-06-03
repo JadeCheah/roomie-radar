@@ -11,19 +11,6 @@ const LoginScreen = ({navigation}) =>  {
   const [password, setPassword] = useState();
 
   const {login} = useContext(AuthContext);
-  
-  // const login = () => {
-  //   signInWithEmailAndPassword(auth, email, password)
-  //     .then(async (userCredential) => {
-  //       // Signed in
-  //       const user = userCredential.user;
-  //       onChangeLoggedInUser(user.email);
-  //     })
-  //     .catch((error) => {
-  //       const errorCode = error.code;
-  //       const errorMessage = error.message;
-  //     });
-  // };
 
   return (
     <View style = {styles.container}>
@@ -57,7 +44,7 @@ const LoginScreen = ({navigation}) =>  {
         <Text style={styles.navButtonText}>Forgot Password?</Text>
       </TouchableOpacity>
       
-      <SocialButton
+      {/* <SocialButton
         buttonTitle="Sign In with Facebook"
         buttonType="facebook"
         color="#4867aa"
@@ -70,7 +57,7 @@ const LoginScreen = ({navigation}) =>  {
         color="#de4d41"
         backgroundColor="#f5e7ea"
         onPress={() => {}}
-      />
+      /> */}
       <TouchableOpacity 
         style={styles.forgotButton} 
         onPress={() => navigation.navigate('Signup')}>
@@ -90,6 +77,7 @@ const styles = StyleSheet.create({
     paddingTop: 50
   },
   logo: {
+    marginTop: 100,
     height: 200,
     width: 200,
     resizeMode: 'cover',
@@ -97,6 +85,7 @@ const styles = StyleSheet.create({
   text: {
     fontFamily: 'Kufam-SemiBoldItalic',
     fontSize: 28,
+    marginTop: 10,
     marginBottom: 10,
     color: '#051d5f',
   },
@@ -104,7 +93,8 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   forgotButton: {
-    marginVertical: 35,
+    marginTop: 20,
+    marginVertical: 20,
   },
   navButtonText: {
     fontSize: 18,

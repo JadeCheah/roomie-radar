@@ -64,20 +64,20 @@ const OnboardingScreen = ({navigation}) => {
             {
                 backgroundColor: '#fff',
                 image: <Image 
-                source={require('../assets/images.jpeg')} // placeholder image for now
+                source={require('../assets/images.jpeg')} 
                 //style = { {width: '100%', height: '100%', resizeMode: 'contain' }} 
                 //style={{ flex: 1, width: '100%', resizeMode: 'cover' }}
                 />,
                 
                 title: 'Roomie radar',
-                subtitle: 'Find your perfect soulmate',
+                subtitle: 'Find your perfect roommate match!',
                 
             },
             {
                 backgroundColor: '#fff',
-                image: <Image source={require('../assets/images.jpeg')} />, // placeholder image for now
+                image: <Image source={require('../assets/images.jpeg')} />, 
                 title: 'Roomie radar',
-                subtitle: 'jkjk, i meant to say roommate',
+                subtitle: 'Set up your profile and start exploring matches today!',
                 //style: {flex: 10}
             },
         ]}
