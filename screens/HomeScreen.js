@@ -17,6 +17,7 @@ const HomeScreen = () => {
             </UserInfoText>
         </UserInfo>
       </Card>
+      <FormButton buttonTitle='Logout' onPress = {() => logout()}/>
     </Container>
   );
 };

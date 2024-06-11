@@ -1,6 +1,6 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import app from "../firebaseConfig";
+import { app } from "../firebaseConfig";
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 import AuthStack from './AuthStack';
@@ -9,7 +9,7 @@ import { AuthContext } from './AuthProvider';
 
 const Routes = () => {
     const {user, setUser} = useContext(AuthContext);
-    const [initializing, setInitializing] = useState(true);
+    // const [initializing, setInitializing] = useState(true);
     
     const auth = getAuth(app);
     useEffect(() => {
