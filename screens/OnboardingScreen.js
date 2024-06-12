@@ -12,7 +12,7 @@ const OnboardingScreen = ({navigation}) => {
         return (
             <View 
                 style={{
-                    width:6,
+                    width: 10,
                     height: 6,
                     marginHorizontal: 3,
                     backgroundColor,
@@ -24,7 +24,7 @@ const OnboardingScreen = ({navigation}) => {
 
     const Skip = ({...props}) => (
         <TouchableOpacity
-            style={{marginHorizontal:10}}
+            style={{marginHorizontal:15}}
             {...props}
         >
             <Text style={{fontSize:16}}>Skip</Text>
@@ -33,7 +33,7 @@ const OnboardingScreen = ({navigation}) => {
     
     const Next = ({...props}) => (
         <TouchableOpacity
-            style={{marginHorizontal:10}}
+            style={{marginHorizontal:15}}
             {...props}
         >
             <Text style={{fontSize:16}}>Next</Text>
@@ -69,15 +69,15 @@ const OnboardingScreen = ({navigation}) => {
                 //style={{ flex: 1, width: '100%', resizeMode: 'cover' }}
                 />,
                 
-                title: 'Roomie radar',
-                subtitle: 'Find your perfect roommate match!',
+                title: 'Roomie Radar',
+                subtitle: 'Struggling to find the right roommate?',
                 
             },
             {
                 backgroundColor: '#fff',
                 image: <Image source={require('../assets/images.jpeg')} />, 
-                title: 'Roomie radar',
-                subtitle: 'Set up your profile and start exploring matches today!',
+                title: 'Roomie Radar',
+                subtitle: 'Start exploring matches today!',
                 //style: {flex: 10}
             },
         ]}

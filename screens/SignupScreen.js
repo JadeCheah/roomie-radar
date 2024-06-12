@@ -31,7 +31,7 @@ const SignupScreen = ({navigation}) => {
                 secureTextEntry={true}
             />
             <FormButton
-                buttonTitle="Sign Up"
+                buttonTitle="Sign up"
                 onPress={() => register(email, password)}
             />
 
