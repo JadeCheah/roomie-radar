@@ -1,6 +1,7 @@
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import HomeScreen from "../screens/HomeScreen";
+import MyTabs from "./MyTabs";
 
 const Stack = createStackNavigator();
 //something missing
@@ -40,9 +41,10 @@ const FeedStack = ({ navigation }) => (
 
 const AppStack = () => {
   return (
-    <Stack.Navigator initialRouteName="Home">
-      <Stack.Screen name="Home" component={HomeScreen} />
-    </Stack.Navigator>
+    // <Stack.Navigator initialRouteName="Home">
+    //   <Stack.Screen name="Home" component={HomeScreen} />
+    // </Stack.Navigator>  
+    <MyTabs />
   );
 };
 
