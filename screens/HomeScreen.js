@@ -1,8 +1,8 @@
 import React, { useContext } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, FlatList} from "react-native";
 
 import FormButton from "../components/FormButton";
-import { AuthContext, FlatList } from "../navigation/AuthProvider";
+import { AuthContext } from "../navigation/AuthProvider";
 import PostCard from '../components/PostCard';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
