@@ -6,7 +6,7 @@ import OnboardingScreen from '../screens/OnboardingScreen';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const Stack = createStackNavigator();
+export const Stack = createStackNavigator();
 
 const AuthStack = () => {
     const [isFirstLaunch, setIsFirstLaunch] = useState(null);

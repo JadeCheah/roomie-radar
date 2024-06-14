@@ -1,7 +1,9 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { initializeAuth, getReactNativePersistence} from "firebase/auth";
-import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
+import { initializeApp, getApp, getApps } from "firebase/app";
+import { getAuth, initializeAuth} from "firebase/auth";
+import { getReactNativePersistence } from "firebase/auth";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -17,25 +19,77 @@ const firebaseConfig = {
   measurementId: "G-81HLXXQHF3"
 };
 
-// Initialize Firebase app
-// let app;
-// let auth;
+// Initialize Firebase app once 
+let app;
+let auth;
 
-// if (!getApps().length) {
-//   app = initializeApp(firebaseConfig);
-//   auth = initializeAuth(app, {
-//     persistence: getReactNativePersistence(ReactNativeAsyncStorage),
-//   });
-// } else {
-//   app = getApp();
-//   auth = getAuth(app);
-// }
-const app = initializeApp(firebaseConfig);
+if (!getApps().length) {
+  try {
+    app = initializeApp(firebaseConfig);
+    auth = initializeAuth(app, {
+      persistence: getReactNativePersistence(AsyncStorage),
+    });
+  } catch (error) {
+    console.log("Error initializing app: " + error);
+  }
+} else {
+  app = getApp();
+  auth = getAuth();
+}
 
-initializeAuth(app, {
-  persistence: getReactNativePersistence(ReactNativeAsyncStorage)
-});
+//Original Version initialisation ---------------------------------------------//
+// const app = initializeApp(firebaseConfig);
 
-export default app;
+// initializeAuth(app, {
+//   persistence: getReactNativePersistence(ReactNativeAsyncStorage)
+// });
+//----------------------------------------------------------------------------//
+
+const uploadToFirebase = async (uri, name, onProgress) => {
+  const fetchResponse = await fetch(uri);
+  const theBlob = await fetchResponse.blob();
+
+  const storage = getStorage();
+  const imageRef = ref(storage, `images/${name}`);
+
+  const uploadTask = uploadBytesResumable(imageRef, theBlob);
+
+  // Register three observers:
+  // 1. 'state_changed' observer, called any time the state changes
+  // 2. Error observer, called on failure
+  // 3. Completion observer, called on successful completion
+  return new Promise((resolve, reject) => {
+    uploadTask.on('state_changed', 
+      (snapshot) => {
+        // Observe state change events such as progress, pause, and resume
+        // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;     
+        console.log('Upload is ' + progress + '% done');
+        switch (snapshot.state) {
+          case 'paused':
+            console.log('Upload is paused');
+            break;
+          case 'running':
+            console.log('Upload is running');
+            break;
+        }
+      }, 
+      (error) => {
+        // Handle unsuccessful uploads
+        reject(error);
+      }, 
+      async () => {
+        // Handle successful uploads on complete
+        // For instance, get the download URL: https://firebasestorage.googleapis.com/...
+        // getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+        //   console.log('File available at', downloadURL);
+        // });
+        const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
+        resolve({ downloadUrl});
+      }
+    );
+  })
+}
+export { app, auth, uploadToFirebase };
 
 
