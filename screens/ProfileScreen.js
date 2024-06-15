@@ -1,7 +1,6 @@
 import React, { useContext } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
 import { UserProfileContext } from '../navigation/UserProfileContext';
-// import takePhoto from '../action/uploadImage';
 
 const ProfileScreen = ({navigation}) => {
     const { profile } = useContext(UserProfileContext);
