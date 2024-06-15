@@ -39,7 +39,7 @@ const Posts = [
 ]
 
 
-const HomeScreen = () => {
+const HomeScreen = ({navigation}) => {
   const { user, logout } = useContext(AuthContext);
   return (
     <Container>
@@ -50,6 +50,7 @@ const HomeScreen = () => {
       showsVerticalScrollIndicator = {false}
       />
       <FormButton buttonTitle="Logout" onPress={() => logout()} />
+      <FormButton buttonTitle="Post" onPress={() => {navigation.navigate("AddPost")}} />
     </Container>
   );
 };
