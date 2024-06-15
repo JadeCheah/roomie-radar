@@ -46,9 +46,10 @@ const ProfileScreen = ({navigation}) => {
                 <Text style={styles.userInfoSubtitle}>Following</Text>
             </View>
           </View>
+          {/* //For Debugging and Testing Purposes 
           <TouchableOpacity onPress={() => navigation.navigate('Upload Photo')}>
             <Text>Upload Photo</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
         </ScrollView>
 

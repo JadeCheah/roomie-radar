@@ -1,6 +1,6 @@
 import React from 'react';
 import ProfileScreen from '../screens/ProfileScreen';
-import UploadPhotoScreen from '../screens/UploadPhotoScreen';
+import EditProfileUploadPhotoScreen from '../screens/EditProfileUploadPhotoScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
 import { UserProfileProvider } from './UserProfileContext';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -19,7 +19,7 @@ const ProfileStack =() => {
                 />
                 <Stack.Screen 
                     name="Upload Photo" 
-                    component={UploadPhotoScreen} 
+                    component={EditProfileUploadPhotoScreen} 
                     options={({navigation}) => ({
                         headerLeft: () => (
                             <Button

@@ -2,10 +2,10 @@ import React, { useEffect, useState, useContext }from 'react';
 import { StyleSheet, Text, View, TouchableOpacity , Alert, Image, ActivityIndicator } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { uploadToFirebase } from '../firebaseConfig';
-import { UserProfileContext } from '../navigation/UserProfileContext';
+// import { UserProfileContext } from '../navigation/UserProfileContext';
 
-const UploadPhotoScreen = ({navigation}) => {
-    const { profile, updateProfile } = useContext(UserProfileContext);
+const AddPostUploadPhotoScreen = ({navigation}) => {
+    // const { profile, updateProfile } = useContext(UserProfileContext);
 
     const [cameraPermission, requestCameraPermission] = ImagePicker.useCameraPermissions();
     const [libraryPermission, requestLibraryPermission] = ImagePicker.useMediaLibraryPermissions();
@@ -71,7 +71,7 @@ const UploadPhotoScreen = ({navigation}) => {
                 const uploadResponse = await uploadToFirebase(imageUri, fileName);
                 console.log(uploadResponse);
                 //------------
-                updateProfile({ ...profile, profilePhoto: uploadResponse.downloadUrl })
+                // updateProfile({ ...profile, profilePhoto: uploadResponse.downloadUrl })
                 //------------
                 Alert.alert("Image uploaded successfully!");
                 setImageUri(null); //clear the image after upload
@@ -139,7 +139,7 @@ const UploadPhotoScreen = ({navigation}) => {
     );
 }
 
-export default UploadPhotoScreen;
+export default AddPostUploadPhotoScreen;
 
 const styles = StyleSheet.create({
     container: {
