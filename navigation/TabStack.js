@@ -11,9 +11,9 @@ const Tab = createBottomTabNavigator();
 
 const MyTabs = () => {
     return (
-        <Tab.Navigator initialRouteName='HomeStackHome'>
+        <Tab.Navigator initialRouteName='Home'>
             <Tab.Screen 
-              name="HomeStackHome" 
+              name="Home" 
               component={HomeStack}
               options={{
                 tabBarIcon: ({ color, size }) => (
