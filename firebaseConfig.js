@@ -4,6 +4,8 @@ import { getAuth, initializeAuth} from "firebase/auth";
 import { getReactNativePersistence } from "firebase/auth";
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getFirestore } from "firebase/firestore";
+
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -19,7 +21,7 @@ const firebaseConfig = {
   measurementId: "G-81HLXXQHF3"
 };
 
-// Initialize Firebase app once 
+// Initialize Firebase app and auth once 
 let app;
 let auth;
 
@@ -49,6 +51,7 @@ const uploadToFirebase = async (uri, name, onProgress) => {
   const fetchResponse = await fetch(uri);
   const theBlob = await fetchResponse.blob();
 
+  //Initialize cloud storage 
   const storage = getStorage();
   const imageRef = ref(storage, `images/${name}`);
 
@@ -85,11 +88,15 @@ const uploadToFirebase = async (uri, name, onProgress) => {
         //   console.log('File available at', downloadURL);
         // });
         const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
-        resolve({ downloadUrl});
+        resolve({ downloadUrl });
       }
     );
   })
 }
-export { app, auth, uploadToFirebase };
+
+//Initialize Cloud Firestore and get a reference to the service
+const firestore = getFirestore(app);
+
+export { app, auth, uploadToFirebase, firestore };
 
 

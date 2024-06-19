@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { auth } from "../firebaseConfig";
 // import { getAuth, onAuthStateChanged } from 'firebase/auth';
@@ -9,21 +9,23 @@ import { AuthContext } from './AuthProvider';
 
 const Routes = () => {
     const {user, setUser} = useContext(AuthContext);
-    // const [initializing, setInitializing] = useState(true);
+    const [initializing, setInitializing] = useState(true);
     
     // const auth = getAuth(app);
+
+    //Authentication state listener
     useEffect(() => {
-        const subscriber = auth.onAuthStateChanged(user => {
+        const subscriber = auth.onAuthStateChanged((user) => {
             setUser(user);
-            // if (initializing) setInitializing(false);
+            if (initializing) setInitializing(false);
         });
 
         //unsubscribe on unmount 
         return () => subscriber();
     
-    }, [setUser]);
+    }, [initializing]);
 
-    // if (initializing) return null; //Possible bug here 
+    if (initializing) return null; //Possible bug here 
 
     return (
         <NavigationContainer>

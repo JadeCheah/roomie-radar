@@ -23,4 +23,4 @@ const styles = StyleSheet.create({
         font: 1,
         marginTop: 100
     }
-})
+}) 

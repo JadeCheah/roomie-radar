@@ -68,14 +68,18 @@ const EditProfileUploadPhotoScreen = ({navigation}) => {
             if (imageUri) {
                 const fileName = imageUri.split('/').pop();
                 setUploading(true);
-                const uploadResponse = await uploadToFirebase(imageUri, fileName);
-                console.log(uploadResponse);
+                const uploadResponse = await uploadToFirebase(imageUri, fileName, (progress) => {
+                    console.log('Upload progress: ${progress}%');
+                });
+                // console.log(uploadResponse);
                 //------------
-                updateProfile({ ...profile, profilePhoto: uploadResponse.downloadUrl })
+                await updateProfile({ ...profile, profilePhoto: uploadResponse.downloadUrl })
                 //------------
                 Alert.alert("Image uploaded successfully!");
                 setImageUri(null); //clear the image after upload
                 navigation.goBack();
+            } else {
+                Alert.alert("No image selected for upload.");
             }
         } catch(e) {
             Alert.alert("Error Uploading Image " + e.message);

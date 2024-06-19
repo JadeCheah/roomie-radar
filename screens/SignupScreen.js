@@ -4,8 +4,10 @@ import FormInput from '../components/FormInput';
 import FormButton from '../components/FormButton';
 import SocialButton from '../components/SocialButton';
 import {AuthContext} from '../navigation/AuthProvider';
+import { UserProfileContext } from '../navigation/UserProfileContext';
 
 const SignupScreen = ({navigation}) => {
+
     const [email, setEmail] = useState();
     const [password, setPassword] = useState();
 

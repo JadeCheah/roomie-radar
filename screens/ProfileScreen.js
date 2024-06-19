@@ -1,22 +1,18 @@
 import React, { useContext } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
 import { UserProfileContext } from '../navigation/UserProfileContext';
+import { defaultProfilePhoto } from '../navigation/UserProfileContext';
 
 const ProfileScreen = ({navigation}) => {
     const { profile } = useContext(UserProfileContext);
-
+    
     return (
         <ScrollView
           style={styles.container}
           contentContainerStyle={{justifyContent: 'center', alignItems: 'center'}}
           showsVerticalScrollIndicator={false}>
-          {profile.profilePhoto && (
-            <Image source={{ uri: profile.profilePhoto }} style={styles.userImg} />
-          )}
-          {/* <Image
-            style={styles.userImg}
-            source={require('../assets/user2.png')}
-          />  */}
+            
+          <Image source={{ uri: profile.profilePhoto }} style={styles.userImg} /> 
           <Text style={styles.userName}>{profile.userName}</Text> 
           <Text style={styles.aboutUser}>{profile.userIntro}</Text>
 
@@ -24,12 +20,6 @@ const ProfileScreen = ({navigation}) => {
             <TouchableOpacity style={styles.userBtn} onPress={() => navigation.navigate('Edit Profile')}>
                 <Text style={styles.userBtnText}>Edit Profile</Text>
             </TouchableOpacity>
-            {/* <TouchableOpacity style={styles.userBtn} onPress={() => {}}>
-                <Text style={styles.userBtnText}>Message</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.userBtn} onPress={() => {}}>
-                <Text style={styles.userBtnText}>Follow</Text>
-            </TouchableOpacity> */}
           </View>
 
           <View style={styles.userInfoContainer}>
@@ -46,11 +36,6 @@ const ProfileScreen = ({navigation}) => {
                 <Text style={styles.userInfoSubtitle}>Following</Text>
             </View>
           </View>
-          {/* //For Debugging and Testing Purposes 
-          <TouchableOpacity onPress={() => navigation.navigate('Upload Photo')}>
-            <Text>Upload Photo</Text>
-          </TouchableOpacity> */}
-
         </ScrollView>
 
     );
