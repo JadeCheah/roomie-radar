@@ -1,11 +1,12 @@
-import React, {createContext, useState} from 'react';
+import React, {createContext, useState, useContext} from 'react';
 import { Alert } from 'react-native';
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut} from 'firebase/auth';
+import {  signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut} from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, firestore } from '../firebaseConfig';
 import { defaultProfilePhoto } from './UserProfileContext';
 
 export const AuthContext = createContext();
+export const useAuth = () => useContext(AuthContext); 
 
 export const AuthProvider = ({children}) => {
 
