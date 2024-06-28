@@ -38,6 +38,18 @@ const ChatScreen = () => {
     setMessages((previousMessages) =>
       GiftedChat.append(previousMessages, messages),
     );
+    messages.forEach(async message => {
+      const { _id, text, createdAt, user } = message;
+      try {
+        await addDoc(collection(firestore, 'messages'), {
+          _id, text,
+          createdAt: createdAt.getTime(), // Store timestamp as milliseconds
+          user
+        });
+      } catch (error) {
+        console.error("Error adding message to Firestore:", error);
+      }
+    });
   }, []);
 
   const renderSend = (props) => {
