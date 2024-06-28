@@ -51,8 +51,9 @@ export const AuthProvider = ({children}) => {
                         const { uid } = userCredential.user;
 
                         //create user profile document in firestore
+                        const shortenedUid = uid.slice(0,6);
                         await setDoc(doc(firestore, 'users', uid), {
-                            userName: uid, //initializing username with userID 
+                            userName: `user-${uid.slice(0,6)}`, //initializing username with userID 
                             userIntro: 'User Introduction',
                             profilePhoto: defaultProfilePhoto,
                         });
@@ -60,6 +61,8 @@ export const AuthProvider = ({children}) => {
                         console.log('User registered and profile created');
                     } catch (e) {
                         console.log(e);
+                        const errorMessage = getErrorMessage(e.code);
+                        Alert.alert('Login Error', errorMessage);
                     }
                
                 },
