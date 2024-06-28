@@ -1,10 +1,9 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp, getApp, getApps } from "firebase/app";
-import { getAuth, initializeAuth} from "firebase/auth";
-import { getReactNativePersistence } from "firebase/auth";
+import { getAuth, initializeAuth, getReactNativePersistence } from "firebase/auth";
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, collection } from "firebase/firestore";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -31,6 +30,7 @@ if (!getApps().length) {
     auth = initializeAuth(app, {
       persistence: getReactNativePersistence(AsyncStorage),
     });
+    console.log("Firebase App initialized:", app);
   } catch (error) {
     console.log("Error initializing app: " + error);
   }
@@ -97,6 +97,9 @@ const uploadToFirebase = async (uri, name, onProgress) => {
 //Initialize Cloud Firestore and get a reference to the service
 const firestore = getFirestore(app);
 
-export { app, auth, uploadToFirebase, firestore };
+console.log("Firestore initialized:", firestore);
+const usersRef = collection(firestore, "users");
+
+export { app, auth, uploadToFirebase, firestore, usersRef };
 
 

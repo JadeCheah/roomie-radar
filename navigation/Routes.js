@@ -25,7 +25,7 @@ const Routes = () => {
     
     }, [initializing]);
 
-    if (initializing) return null; //Possible bug here 
+    if (initializing) return; //Possible bug here, used to be null
 
     return (
         <NavigationContainer>
