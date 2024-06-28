@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
-import { useAuth } from '../navigation/AuthProvider';
+import {useAuth } from '../navigation/AuthProvider';
 import { StatusBar } from 'expo-status-bar';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import ChatList from '../components/ChatList';
 import { getDocs, query, where } from 'firebase/firestore';
-import { firestore, usersRef } from '../firebaseConfig'; 
+import { auth, firestore, usersRef } from '../firebaseConfig'; 
+import {getAuth} from 'firebase/auth';
 
 if (!firestore) {
   console.error("Firestore is undefined");
@@ -15,8 +16,10 @@ if (!firestore) {
 
 
 const ChatScreen = () => {
-  const { logout, user } = useAuth();
+ // const { logout, user } = useAuth();
   const [users, setUsers] = useState([]);
+  //const auth = getAuth();
+  const user = auth.currentUser;
 
   useEffect(() => {
     console.log('Current user:', user);
@@ -29,12 +32,9 @@ const ChatScreen = () => {
   
   
   const getUsers = async () => {
-    if (!user || !user.userName) {
-      console.error("User or userName is undefined");
-      return;
-    }
+  
   try {
-    const q = query(usersRef, where('userName', '!=', user?.userName)); // Assuming 'userId' correctly points to user IDs in documents.
+    const q = query(usersRef, where('uid', '!=', user?.uid)); // Assuming 'userId' correctly points to user IDs in documents.
     const querySnapshot = await getDocs(q);
     let data = [];
     querySnapshot.forEach((doc) => {

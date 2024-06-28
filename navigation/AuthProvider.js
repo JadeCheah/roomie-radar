@@ -1,17 +1,39 @@
-import React, {createContext, useState, useContext} from 'react';
+import React, {createContext, useState, useContext, useEffect} from 'react';
 import { Alert } from 'react-native';
 import {  signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut} from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, firestore } from '../firebaseConfig';
 import { defaultProfilePhoto } from './UserProfileContext';
+import { onAuthStateChanged } from 'firebase/auth';
+
+
 
 export const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext); 
 
 export const AuthProvider = ({children}) => {
+   
 
     const [user, setUser] = useState(null);
+      
     // const auth = getAuth(app);
+
+
+useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        if (currentUser && currentUser.userName) {
+            console.log('User is logged in');
+            // Optionally set more user details from Firestore if needed
+            setUser(currentUser);
+        } else {
+            console.log('No user logged in');
+            setUser(null);
+        }
+    });
+
+    return () => unsubscribe(); // Unsubscribe on cleanup
+}, []);
+  
 
     const getErrorMessage = (errorCode) => {
         switch(errorCode) {
@@ -53,6 +75,7 @@ export const AuthProvider = ({children}) => {
 
                         //create user profile document in firestore
                         await setDoc(doc(firestore, 'users', uid), {
+                            email,
                             userName: uid, //initializing username with userID 
                             userIntro: 'User Introduction',
                             profilePhoto: defaultProfilePhoto,
@@ -66,7 +89,7 @@ export const AuthProvider = ({children}) => {
                 },
                 logout: async () => {
                     try {
-                        await signOut(auth);
+                        await sosignOut(auth);
                     } catch (e) {
                         console.log(e);
                     }
