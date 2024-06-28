@@ -1,83 +1,107 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
-import {useAuth } from '../navigation/AuthProvider';
-import { StatusBar } from 'expo-status-bar';
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import ChatList from '../components/ChatList';
-import { getDocs, query, where } from 'firebase/firestore';
-import { auth, firestore, usersRef } from '../firebaseConfig'; 
-import {getAuth} from 'firebase/auth';
 
-if (!firestore) {
-  console.error("Firestore is undefined");
-} else {
-  console.log("Firestore is defined");
-}
 
+import React, {useState, useEffect, useCallback} from 'react';
+import {View, ScrollView, Text, Button, StyleSheet} from 'react-native';
+import {Bubble, GiftedChat, Send} from 'react-native-gifted-chat';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 const ChatScreen = () => {
- // const { logout, user } = useAuth();
-  const [users, setUsers] = useState([]);
-  //const auth = getAuth();
-  const user = auth.currentUser;
+  const [messages, setMessages] = useState([]);
 
   useEffect(() => {
-    console.log('Current user:', user);
-    if (user) {
-      getUsers();
-    } else {
-      console.log('No user logged in');
-    }
-  }, [user]); // Re-run when user state changes
-  
-  
-  const getUsers = async () => {
-  
-  try {
-    const q = query(usersRef, where('uid', '!=', user?.uid)); // Assuming 'userId' correctly points to user IDs in documents.
-    const querySnapshot = await getDocs(q);
-    let data = [];
-    querySnapshot.forEach((doc) => {
-      console.log(doc.id, "=>", doc.data()); // This will help you verify the structure and content of fetched documents.
-      data.push({
-        id: doc.id,
-        profilePhoto: doc.data().profilePhoto,
-        userIntro: doc.data().userIntro,
-        userName: doc.data().userName,
-        ...doc.data() // Add other fields as necessary
-      });
-    });
-    console.log('got users:', data);
-    setUsers(data);
-  } catch (error) {
-    console.error("Failed to fetch users:", error);
-  }  
-};
+    setMessages([
+      {
+        _id: 1,
+        text: 'Hello developer',
+        createdAt: new Date(),
+        user: {
+          _id: 2,
+          name: 'React Native',
+          avatar: 'https://placeimg.com/140/140/any',
+        },
+      },
+      {
+        _id: 2,
+        text: 'Hello world',
+        createdAt: new Date(),
+        user: {
+          _id: 1,
+          name: 'React Native',
+          avatar: 'https://placeimg.com/140/140/any',
+        },
+      },
+    ]);
+  }, []);
 
-  
-  
+  const onSend = useCallback((messages = []) => {
+    setMessages((previousMessages) =>
+      GiftedChat.append(previousMessages, messages),
+    );
+  }, []);
 
-  console.log('user data: ', user);
+  const renderSend = (props) => {
+    return (
+      <Send {...props}>
+        <View>
+          <MaterialCommunityIcons
+            name="send-circle"
+            style={{marginBottom: 5, marginRight: 5}}
+            size={32}
+            color="#2e64e5"
+          />
+        </View>
+      </Send>
+    );
+  };
+
+  const renderBubble = (props) => {
+    return (
+      <Bubble
+        {...props}
+        wrapperStyle={{
+          right: {
+            backgroundColor: '#2e64e5',
+          },
+        }}
+        textStyle={{
+          right: {
+            color: '#fff',
+          },
+        }}
+      />
+    );
+  };
+
+  const scrollToBottomComponent = () => {
+    return(
+      <FontAwesome name='angle-double-down' size={22} color='#333' />
+    );
+  }
 
   return (
-    <View style={{ flex: 1, backgroundColor: 'white' }}>
-      <StatusBar style="light" />
-      {users.length > 0 ? (
-        <ChatList users={users} />
-      ) : (
-        <View style={styles.centeredView}>
-          <ActivityIndicator size="large" />
-        </View>
-      )}
-    </View>
+    <GiftedChat
+      messages={messages}
+      onSend={(messages) => onSend(messages)}
+      user={{
+        _id: 1,
+      }}
+      renderBubble={renderBubble}
+      alwaysShowSend
+      renderSend={renderSend}
+      scrollToBottom
+      scrollToBottomComponent={scrollToBottomComponent}
+    />
   );
-}
+};
 
 export default ChatScreen;
 
 const styles = StyleSheet.create({
-  centeredView: {
-    alignItems: 'center', // This replaces 'items-center'
-    top: hp(30),           // Moves the View down by 30% of the screen height
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
+
