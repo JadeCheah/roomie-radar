@@ -1,42 +1,42 @@
-import React, {createContext, useState, useContext, useEffect} from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Alert } from 'react-native';
-import {  signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut} from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, firestore } from '../firebaseConfig';
 import { defaultProfilePhoto } from './UserProfileContext';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, updateProfile } from 'firebase/auth';
 
 
 
 export const AuthContext = createContext();
-export const useAuth = () => useContext(AuthContext); 
+export const useAuth = () => useContext(AuthContext);
 
-export const AuthProvider = ({children}) => {
-   
+export const AuthProvider = ({ children }) => {
+
 
     const [user, setUser] = useState(null);
-      
+
     // const auth = getAuth(app);
 
 
-useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-        if (currentUser && currentUser.userName) {
-            console.log('User is logged in');
-            // Optionally set more user details from Firestore if needed
-            setUser(currentUser);
-        } else {
-            console.log('No user logged in');
-            setUser(null);
-        }
-    });
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            if (currentUser && currentUser.displayName) {
+                console.log('User is logged in');
+                // Optionally set more user details from Firestore if needed
+                setUser(currentUser);
+            } else {
+                console.log('No user logged in');
+                setUser(null);
+            }
+        });
 
-    return () => unsubscribe(); // Unsubscribe on cleanup
-}, []);
-  
+        return () => unsubscribe(); // Unsubscribe on cleanup
+    }, []);
+
 
     const getErrorMessage = (errorCode) => {
-        switch(errorCode) {
+        switch (errorCode) {
             case 'auth/invalid-email':
                 return 'Invalid email address format.';
             case 'auth/user-disabled':
@@ -49,7 +49,7 @@ useEffect(() => {
                 return 'Email is already in use.';
             case 'auth/invalid-credential':
                 return 'The provided authentication credential is invalid or has expired. Please try again.';
-            default: 
+            default:
                 return 'An unknown error occured. Please try again.';
         }
     };
@@ -59,10 +59,10 @@ useEffect(() => {
             value={{
                 user,
                 setUser,
-                login: async(email, password) => {
+                login: async (email, password) => {
                     try {
                         await signInWithEmailAndPassword(auth, email, password);
-                    } catch(e) {
+                    } catch (e) {
                         console.log(e);
                         const errorMessage = getErrorMessage(e.code);
                         Alert.alert('Login Error', errorMessage);
@@ -76,20 +76,31 @@ useEffect(() => {
                         //create user profile document in firestore
                         await setDoc(doc(firestore, 'users', uid), {
                             email,
-                            userName: uid, //initializing username with userID 
+                            userName: `user-${uid.slice(0, 4)}`, //initializing username with userID 
                             userIntro: 'User Introduction',
                             profilePhoto: defaultProfilePhoto,
                         });
 
+                        //update auth user profile field
+                        await updateProfile(userCredential.user, {
+                            displayName: `user-${uid.slice(0, 4)}`,
+                            photoURL: defaultProfilePhoto,
+                        }).then(() => {
+                            console.log("displayName and photoURL updated");
+                        }).catch((error) => {
+                            console.error("Error: ", error);
+                        });
+
                         console.log('User registered and profile created');
+
                     } catch (e) {
                         console.log(e);
                     }
-               
+
                 },
                 logout: async () => {
                     try {
-                        await sosignOut(auth);
+                        await signOut(auth);
                     } catch (e) {
                         console.log(e);
                     }

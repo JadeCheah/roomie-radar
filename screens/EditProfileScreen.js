@@ -4,12 +4,12 @@ import { UserProfileContext } from '../navigation/UserProfileContext';
 import { TextInput } from 'react-native-gesture-handler';
 
 const EditProfileScreen = ({navigation}) => {
-    const { profile, updateProfile } = useContext(UserProfileContext);
+    const { profile, updateUserProfile } = useContext(UserProfileContext);
     const [userName, setUserName] = useState(profile.userName);
     const [userIntro, setUserIntro] = useState(profile.userIntro);
 
     const saveProfile = () => {
-        updateProfile({ userName, userIntro, profilePhoto: profile.profilePhoto });
+        updateUserProfile({ userName, userIntro, profilePhoto: profile.profilePhoto });
         navigation.goBack();
     };
 

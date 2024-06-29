@@ -33,26 +33,26 @@ const ChatScreen = () => {
   
   const getUsers = async () => {
   
-  try {
-    const q = query(usersRef, where('uid', '!=', user?.uid)); // Assuming 'userId' correctly points to user IDs in documents.
-    const querySnapshot = await getDocs(q);
-    let data = [];
-    querySnapshot.forEach((doc) => {
-      console.log(doc.id, "=>", doc.data()); // This will help you verify the structure and content of fetched documents.
-      data.push({
-        id: doc.id,
-        profilePhoto: doc.data().profilePhoto,
-        userIntro: doc.data().userIntro,
-        userName: doc.data().userName,
-        ...doc.data() // Add other fields as necessary
+    try {
+      const q = query(usersRef, where('uid', '!=', user?.uid)); // Assuming 'userId' correctly points to user IDs in documents.
+      const querySnapshot = await getDocs(q);
+      let data = [];
+      querySnapshot.forEach((doc) => {
+        console.log(doc.id, "=>", doc.data()); // This will help you verify the structure and content of fetched documents.
+        data.push({
+          id: doc.id,
+          profilePhoto: doc.data().profilePhoto,
+          userIntro: doc.data().userIntro,
+          userName: doc.data().userName,
+          ...doc.data() // Add other fields as necessary
+        });
       });
-    });
-    console.log('got users:', data);
-    setUsers(data);
-  } catch (error) {
-    console.error("Failed to fetch users:", error);
-  }  
-};
+      console.log('got users:', data);
+      setUsers(data);
+    } catch (error) {
+      console.error("Failed to fetch users:", error);
+    }  
+  };
 
   
   

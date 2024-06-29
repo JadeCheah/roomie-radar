@@ -5,7 +5,7 @@ import { uploadToFirebase } from '../firebaseConfig';
 // import { UserProfileContext } from '../navigation/UserProfileContext';
 
 const AddPostUploadPhotoScreen = ({navigation}) => {
-    // const { profile, updateProfile } = useContext(UserProfileContext);
+    // const { profile, updateUserProfile } = useContext(UserProfileContext);
 
     const [cameraPermission, requestCameraPermission] = ImagePicker.useCameraPermissions();
     const [libraryPermission, requestLibraryPermission] = ImagePicker.useMediaLibraryPermissions();
@@ -71,7 +71,7 @@ const AddPostUploadPhotoScreen = ({navigation}) => {
                 const uploadResponse = await uploadToFirebase(imageUri, fileName);
                 console.log(uploadResponse);
                 //------------
-                // updateProfile({ ...profile, profilePhoto: uploadResponse.downloadUrl })
+                // updateUserProfile({ ...profile, profilePhoto: uploadResponse.downloadUrl })
                 //------------
                 Alert.alert("Image uploaded successfully!");
                 setImageUri(null); //clear the image after upload

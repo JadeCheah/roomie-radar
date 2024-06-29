@@ -3,6 +3,7 @@ import { Image } from 'react-native';
 // import AsyncStorage from '@react-native-async-storage/async-storage';
 import { auth, firestore } from '../firebaseConfig';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { updateProfile } from 'firebase/auth';
 // import { useNavigation } from '@react-navigation/native';
 
 
@@ -28,9 +29,9 @@ const UserProfileProvider = ({children}) => {
                     if (profileDoc.exists()) {
                         const profileData = profileDoc.data();
                         setProfile({
-                            userName: profileData.userName,
+                            userName: user.displayName,
                             userIntro: profileData.userIntro,
-                            profilePhoto: profileData.profilePhoto || defaultProfilePhoto,
+                            profilePhoto: user.photoURL || defaultProfilePhoto,
                         });
                     } else {
                         //If no profile exists, initialize with default value
@@ -38,7 +39,8 @@ const UserProfileProvider = ({children}) => {
                             userName: 'New User',
                             userIntro: 'User Introduction',
                             profilePhoto: defaultProfilePhoto,
-                        });66
+                        });
+
                     }
                 } catch (error) {
                     console.error('Failed to load profile', error);
@@ -50,7 +52,6 @@ const UserProfileProvider = ({children}) => {
         loadProfile();
 
     }, [auth.currentUser]);
-    // }, [auth.currentUser]);
 
     // const addNewUser = async (userId, userData) => {
     //     try {
@@ -61,10 +62,11 @@ const UserProfileProvider = ({children}) => {
     //     }
     // };
     
-    const updateProfile = async (newProfile) => {
+    const updateUserProfile = async (newProfile) => {
         const user = auth.currentUser;
         if (user) {
             try {
+                //Update Firestore profile
                 const profileDocRef = doc(firestore, 'users', user.uid);
                 const profileDoc = await getDoc(profileDocRef);
 
@@ -83,6 +85,13 @@ const UserProfileProvider = ({children}) => {
                         profilePhoto: newProfile.profilePhoto || defaultProfilePhoto,
                     });
                 }
+
+                //update Firebase Auth profile 
+                await updateProfile(user, {
+                    displayName: newProfile.userName,
+                    photoURL: newProfile.profilePhoto || defaultProfilePhoto
+                });
+
                 //update the local state 
                 setProfile({
                     ...newProfile,
@@ -99,7 +108,7 @@ const UserProfileProvider = ({children}) => {
     };
 
     return (
-        <UserProfileContext.Provider value={{ profile, updateProfile }}>
+        <UserProfileContext.Provider value={{ profile, updateUserProfile }}>
             {children}
         </UserProfileContext.Provider>
     );

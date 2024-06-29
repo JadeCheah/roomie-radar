@@ -1,41 +1,40 @@
 import React, { useContext } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
 import { UserProfileContext } from '../navigation/UserProfileContext';
-import { defaultProfilePhoto } from '../navigation/UserProfileContext';
 
-const ProfileScreen = ({navigation}) => {
+const ProfileScreen = ({ navigation }) => {
     const { profile } = useContext(UserProfileContext);
-    
+
     return (
         <ScrollView
-          style={styles.container}
-          contentContainerStyle={{justifyContent: 'center', alignItems: 'center'}}
-          showsVerticalScrollIndicator={false}>
-            
+            style={styles.container}
+            contentContainerStyle={{ justifyContent: 'center', alignItems: 'center' }}
+            showsVerticalScrollIndicator={false}>
+
           <Image source={{ uri: profile.profilePhoto }} style={styles.userImg} /> 
           <Text style={styles.userName}>{profile.userName}</Text> 
           <Text style={styles.aboutUser}>{profile.userIntro}</Text>
 
-          <View style={styles.userBtnWrapper}>
-            <TouchableOpacity style={styles.userBtn} onPress={() => navigation.navigate('Edit Profile')}>
-                <Text style={styles.userBtnText}>Edit Profile</Text>
-            </TouchableOpacity>
-          </View>
+            <View style={styles.userBtnWrapper}>
+                <TouchableOpacity style={styles.userBtn} onPress={() => navigation.navigate('Edit Profile')}>
+                    <Text style={styles.userBtnText}>Edit Profile</Text>
+                </TouchableOpacity>
+            </View>
 
-          <View style={styles.userInfoContainer}>
-            <View style={styles.userInfoItem}>
-                <Text style={styles.userInfoTitle}>22</Text>
-                <Text style={styles.userInfoSubtitle}>Posts</Text>
+            <View style={styles.userInfoContainer}>
+                <View style={styles.userInfoItem}>
+                    <Text style={styles.userInfoTitle}>22</Text>
+                    <Text style={styles.userInfoSubtitle}>Posts</Text>
+                </View>
+                <View style={styles.userInfoItem}>
+                    <Text style={styles.userInfoTitle}>100</Text>
+                    <Text style={styles.userInfoSubtitle}>Followers</Text>
+                </View>
+                <View style={styles.userInfoItem}>
+                    <Text style={styles.userInfoTitle}>50</Text>
+                    <Text style={styles.userInfoSubtitle}>Following</Text>
+                </View>
             </View>
-            <View style={styles.userInfoItem}>
-                <Text style={styles.userInfoTitle}>100</Text>
-                <Text style={styles.userInfoSubtitle}>Followers</Text>
-            </View>
-            <View style={styles.userInfoItem}>
-                <Text style={styles.userInfoTitle}>50</Text>
-                <Text style={styles.userInfoSubtitle}>Following</Text>
-            </View>
-          </View>
         </ScrollView>
 
     );
@@ -55,7 +54,7 @@ const styles = StyleSheet.create({
         borderRadius: 75,
     },
     userName: {
-        fontSize: 18, 
+        fontSize: 18,
         fontWeight: 'bold',
         marginTop: 10,
         marginBottom: 10,
@@ -75,7 +74,7 @@ const styles = StyleSheet.create({
     },
     userBtn: {
         borderColor: '#2e64e5',
-        borderWidth: 2, 
+        borderWidth: 2,
         borderRadius: 3,
         paddingVertical: 8,
         paddingHorizontal: 12,
@@ -94,7 +93,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     userInfoTitle: {
-        fontSize: 20, 
+        fontSize: 20,
         fontWeight: 'bold',
         marginBottom: 5,
         textAlign: 'center',

@@ -15,8 +15,6 @@ export default AppStack;
 
 
 
-
-
 // const FeedStack = ({ navigation }) => (
 //   <Stack.Navigator>
 //     <Stack.Screen
