@@ -1,9 +1,12 @@
 import React, { useContext } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
 import { UserProfileContext } from '../navigation/UserProfileContext';
+import { AuthContext } from "../navigation/AuthProvider";
+import FormButton from '../components/FormButton';
 
 const ProfileScreen = ({ navigation }) => {
     const { profile } = useContext(UserProfileContext);
+    const { logout } = useContext(AuthContext);
 
     return (
         <ScrollView
@@ -35,6 +38,7 @@ const ProfileScreen = ({ navigation }) => {
                     <Text style={styles.userInfoSubtitle}>Following</Text>
                 </View>
             </View>
+            <FormButton buttonTitle="Logout" onPress={() => logout()} />
         </ScrollView>
 
     );

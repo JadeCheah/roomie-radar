@@ -49,7 +49,7 @@ const HomeScreen = ({navigation}) => {
       keyExtractor={item=>item.id}
       showsVerticalScrollIndicator = {false}
       />
-      <FormButton buttonTitle="Logout" onPress={() => logout()} />
+      {/* <FormButton buttonTitle="Logout" onPress={() => logout()} /> */}
       <FormButton buttonTitle="Post" onPress={() => {navigation.navigate("AddPost")}} />
     </Container>
   );
