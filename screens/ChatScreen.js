@@ -1,103 +1,57 @@
-
-
-import React, {useState, useEffect, useCallback} from 'react';
-import {View, ScrollView, Text, Button, StyleSheet} from 'react-native';
-import {Bubble, GiftedChat, Send} from 'react-native-gifted-chat';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, StyleSheet } from 'react-native';
+import { Bubble, GiftedChat, Send } from 'react-native-gifted-chat';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { useAuth } from '../navigation/AuthProvider';
+import { firestore } from '../firebaseConfig'; 
 
-const ChatScreen = () => {
+const ChatScreen = ({ route }) => {
   const [messages, setMessages] = useState([]);
-
-  useEffect(() => {
-    setMessages([
-      {
-        _id: 1,
-        text: 'Hello developer',
-        createdAt: new Date(),
-        user: {
-          _id: 2,
-          name: 'React Native',
-          avatar: 'https://placeimg.com/140/140/any',
-        },
-      },
-      {
-        _id: 2,
-        text: 'Hello world',
-        createdAt: new Date(),
-        user: {
-          _id: 1,
-          name: 'React Native',
-          avatar: 'https://placeimg.com/140/140/any',
-        },
-      },
-    ]);
-  }, []);
+  const { user } = useAuth();
+  const { recipientId, recipientName } = route.params;
 
   const onSend = useCallback((messages = []) => {
-    setMessages((previousMessages) =>
-      GiftedChat.append(previousMessages, messages),
-    );
+    setMessages(previousMessages => GiftedChat.append(previousMessages, messages));
     messages.forEach(async message => {
-      const { _id, text, createdAt, user } = message;
       try {
+        console.log(user);  // See what properties are available
         await addDoc(collection(firestore, 'messages'), {
-          _id, text,
-          createdAt: createdAt.getTime(), // Store timestamp as milliseconds
-          user
+          text: message.text,
+          createdAt: serverTimestamp(),
+          senderId: user.uid,  
+          recipientId: recipientId,
+          recipientName: recipientName,
+           senderName: user.displayName,  
+          senderProfilePhoto: user.photoURL,
         });
       } catch (error) {
         console.error("Error adding message to Firestore:", error);
       }
     });
-  }, []);
+  }, [recipientId, user]);
 
-  const renderSend = (props) => {
-    return (
-      <Send {...props}>
-        <View>
-          <MaterialCommunityIcons
-            name="send-circle"
-            style={{marginBottom: 5, marginRight: 5}}
-            size={32}
-            color="#2e64e5"
-          />
-        </View>
-      </Send>
-    );
-  };
+  const renderSend = (props) => (
+    <Send {...props}>
+      <View style={{ marginBottom: 5, marginRight: 5 }}>
+        <MaterialCommunityIcons name="send-circle" size={32} color="#2e64e5" />
+      </View>
+    </Send>
+  );
 
-  const renderBubble = (props) => {
-    return (
-      <Bubble
-        {...props}
-        wrapperStyle={{
-          right: {
-            backgroundColor: '#2e64e5',
-          },
-        }}
-        textStyle={{
-          right: {
-            color: '#fff',
-          },
-        }}
-      />
-    );
-  };
+  const renderBubble = (props) => (
+    <Bubble {...props} wrapperStyle={{ right: { backgroundColor: '#2e64e5' } }} textStyle={{ right: { color: '#fff' } }} />
+  );
 
-  const scrollToBottomComponent = () => {
-    return(
-      <FontAwesome name='angle-double-down' size={22} color='#333' />
-    );
-  }
+  const scrollToBottomComponent = () => (
+    <MaterialCommunityIcons name="chevron-double-down" size={22} color="#333" />
+  );
 
   return (
     <GiftedChat
       messages={messages}
-      onSend={(messages) => onSend(messages)}
-      user={{
-        _id: 1,
-      }}
+      onSend={onSend}
+      user={{ _id: user.uid, name: user.displayName, avatar: user.photoURL }}
       renderBubble={renderBubble}
       alwaysShowSend
       renderSend={renderSend}
@@ -110,10 +64,6 @@ const ChatScreen = () => {
 export default ChatScreen;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  container: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 });
 

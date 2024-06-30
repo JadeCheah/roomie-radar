@@ -14,7 +14,7 @@ const ChatStack = () => {
                 options={{ headerShown: false, title: 'Messages' }}
             />
             <Stack.Screen 
-                name="Chat" 
+                name="ChatScreen" 
                 component={ChatScreen} 
                 options={({ route }) => ({ 
                   title: route.params.userName, // Dynamically set the header title to the user's name

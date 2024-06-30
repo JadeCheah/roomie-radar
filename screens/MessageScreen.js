@@ -1,144 +1,135 @@
-// import React, { useEffect, useState } from 'react';
-// import { View, Text, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
-// import {useAuth } from '../navigation/AuthProvider';
-// import { StatusBar } from 'expo-status-bar';
-// import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-// import ChatList from '../components/ChatList';
-// import { getDocs, query, where } from 'firebase/firestore';
-// import { auth, firestore, usersRef } from '../firebaseConfig'; 
-// import {getAuth} from 'firebase/auth';
-
-
-
-// if (!firestore) {
-//   console.error("Firestore is undefined");
-// } else {
-//   console.log("Firestore is defined");
-// }
-
-
-// const ChatScreen = () => {
-//  // const { logout, user } = useAuth();
-//   const [users, setUsers] = useState([]);
-//   //const auth = getAuth();
-//   const user = auth.currentUser;
-
-//   useEffect(() => {
-//     console.log('Current user:', user);
-//     if (user) {
-//       getUsers();
-//     } else {
-//       console.log('No user logged in');
-//     }
-//   }, [user]); // Re-run when user state changes
-  
-  
-//   const getUsers = async () => {
-  
-//   try {
-//     const q = query(usersRef, where('uid', '!=', user?.uid)); // Assuming 'userId' correctly points to user IDs in documents.
-//     const querySnapshot = await getDocs(q);
-//     let data = [];
-//     querySnapshot.forEach((doc) => {
-//       console.log(doc.id, "=>", doc.data()); // This will help you verify the structure and content of fetched documents.
-//       data.push({
-//         id: doc.id,
-//         profilePhoto: doc.data().profilePhoto,
-//         userIntro: doc.data().userIntro,
-//         userName: doc.data().userName,
-//         ...doc.data() // Add other fields as necessary
-//       });
-//     });
-//     console.log('got users:', data);
-//     setUsers(data);
-//   } catch (error) {
-//     console.error("Failed to fetch users:", error);
-//   }  
-// };
-
-  
-  
-
-//   console.log('user data: ', user);
-
-//   return (
-//     <View style={{ flex: 1, backgroundColor: 'white' }}>
-//       <StatusBar style="light" />
-//       {users.length > 0 ? (
-//         <ChatList users={users} />
-//       ) : (
-//         <View style={styles.centeredView}>
-//           <ActivityIndicator size="large" />
-//         </View>
-//       )}
-//     </View>
-//   );
-// }
-
-// export default ChatScreen;
-
-// const styles = StyleSheet.create({
-//   centeredView: {
-//     alignItems: 'center', // This replaces 'items-center'
-//     top: hp(30),           // Moves the View down by 30% of the screen height
-//   },
-// });
-
-
-
 
 import React, { useEffect, useState } from 'react';
-import { FlatList } from 'react-native';
-import { Container, Card, UserInfo, UserImgWrapper, UserImg, UserInfoText, UserName, PostTime, MessageText, TextSection } from '../styles/MessageStyles';
+import { FlatList, Text, TouchableOpacity, View, StyleSheet, Alert } from 'react-native';
 import { firestore } from '../firebaseConfig'; 
-import { getFirestore, collection, query, orderBy, onSnapshot } from 'firebase/firestore';
-
-
-
+import { query, collection, where, onSnapshot, orderBy, getDocs } from 'firebase/firestore';
+import { useAuth } from '../navigation/AuthProvider';
 
 const MessageScreen = ({ navigation }) => {
-    const [messages, setMessages] = useState([]);
-    console.log(firestore); // Check if it's undefined
+    const [chats, setChats] = useState([]);
+    const { user } = useAuth();  // Fetching the current authenticated user
+
+    const initiateConversation = async (email) => {
+        const usersRef = collection(firestore, 'users');
+        const q = query(usersRef, where('email', '==', email));
+        
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+            const userData = querySnapshot.docs[0].data();
+            const userId = querySnapshot.docs[0].id;
+            
+            // Optionally check for an existing conversation or create a new one
+            navigation.navigate('ChatScreen', {
+                recipientId: userId,
+                recipientName: userData.displayName || "Unknown",
+            });
+        } else {
+            Alert.alert("Invalid email", "No user found with this email address.");
+        }
+    };
+
+    const promptForEmail = () => {
+        Alert.prompt(
+            'Start New Conversation',
+            'Enter the email address of the user:',
+            [
+                {
+                    text: 'Cancel',
+                    style: 'cancel',
+                },
+                {
+                    text: 'OK',
+                    onPress: email => initiateConversation(email),
+                },
+            ],
+            'plain-text'
+        );
+    };
+
 
     useEffect(() => {
-      const q = query(collection(firestore, 'messages'), orderBy('messageTime', 'desc'));
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-          const messagesData = snapshot.docs.map(doc => ({
-              id: doc.id,
-              ...doc.data(),
-          }));
-          setMessages(messagesData);
-      }, err => {
-          console.error('Failed to fetch messages:', err);
-      });
-  
-      return () => unsubscribe();
-  }, []);
+        if (!user) return;
+    
+        const conversationsRef = collection(firestore, 'conversations');
+
+        const q = query(collection(firestore, 'users'), orderBy('userName', 'desc'));
+
+
+        // const q = query(
+        //     conversationsRef,
+        //     where("participantIds", "array-contains", user.uid),
+        //     orderBy("lastMessageTime", "desc")
+        // );
+    
+        const unsubscribe = onSnapshot(q, snapshot => {
+            const fetchedChats = snapshot.docs.map(doc => ({
+                id: doc.id,
+                userName: "Conversation", // You need another query to fetch user details unless stored in each conversation
+                lastMessage: doc.data().lastMessage,
+                lastMessageTime: doc.data().lastMessageTime
+            }));
+            setChats(fetchedChats);
+        });
+    
+        return () => unsubscribe();
+    }, [user]);
+
+    const goToChat = (userId, userName) => {
+        navigation.navigate('ChatScreen', {
+            recipientId: userId,
+            recipientName: userName
+        });
+    };
+    
 
     return (
-        <Container>
-            <FlatList 
-                data={messages}
-                keyExtractor={item => item.id}
-                renderItem={({ item }) => (
-                    <Card onPress={() => navigation.navigate('Chat', { userName: item.userName })}>
-                        <UserInfo>
-                            <UserImgWrapper>
-                                <UserImg source={{ uri: item.userImg }} />
-                            </UserImgWrapper>
-                            <TextSection>
-                                <UserInfoText>
-                                    <UserName>{item.userName}</UserName>
-                                    <PostTime>{new Date(item.messageTime.seconds * 1000).toLocaleTimeString()}</PostTime>
-                                </UserInfoText>
-                                <MessageText>{item.messageText}</MessageText>
-                            </TextSection>
-                        </UserInfo>
-                    </Card>
-                )}
-            />
-        </Container>
+        <View style={StyleSheet.container}>
+            <TouchableOpacity onPress={promptForEmail} style={styles.addButton}>
+                <Text style={styles.addButtonText}>+</Text>
+            </TouchableOpacity>
+        <FlatList
+            data={chats}
+            keyExtractor={item => item.id}
+            renderItem={({ item }) => (
+                <TouchableOpacity
+                    onPress={() => navigation.navigate('Chat', {
+                        recipientId: item.id,
+                        recipientName: item.userName
+                    })}
+                >
+                    <Text>{item.userName}</Text>
+                    <Text>{item.lastMessage}</Text>
+                </TouchableOpacity>
+            )}
+        />
+        </View>
     );
 };
 
 export default MessageScreen;
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        padding: 10
+    },
+    addButton: {
+        padding: 10,
+        position: 'absolute',
+        right: 10,
+        top: 10,
+        zIndex: 1
+    },
+    addButtonText: {
+        fontSize: 24,
+        color: '#2e64e5'
+    },
+    userName: {
+        fontSize: 18,
+        fontWeight: 'bold'
+    },
+    lastMessage: {
+        fontSize: 14,
+        color: '#666'
+    }
+});
