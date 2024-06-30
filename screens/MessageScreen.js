@@ -16,6 +16,19 @@ const MessageScreen = ({ navigation }) => {
       return;
     }
 
+    // if (user.uid === selectedRecipientId) {
+    //     // Show an alert to the user
+    //     Alert.alert(
+    //         "Cannot Send Message", // Title of the alert
+    //         "You cannot send messages to yourself.", // Message of the alert
+    //         [
+    //             { text: "OK", onPress: () => console.log("User acknowledged the warning.") }
+    //         ],
+    //         { cancelable: false } // This prevents the alert from being dismissed by tapping outside of it
+    //     );
+    //     return;
+    // }
+
     console.log("User authenticated. Setting up subscription for chat conversations...");
     const conversationsRef = collection(firestore, 'conversations');
     const participantIds = user && selectedRecipientId ? [user.uid, selectedRecipientId].sort() : [];
@@ -54,7 +67,7 @@ const MessageScreen = ({ navigation }) => {
       console.log(`User found: ${userId}. Navigating to ChatScreen.`);
       navigation.navigate('ChatScreen', {
         recipientId: userId,
-        recipientName: userData.displayName || "Unknown",
+        recipientName: userData?.userName || "Unknown",
       });
     } else {
       console.log("No user found with the given email.");

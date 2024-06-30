@@ -14,7 +14,7 @@ const ChatScreen = ({ route }) => {
   useEffect(() => {
     console.log(`[ChatScreen] Setting up snapshot listener for conversation ${conversationId}`);
     const messagesRef = collection(firestore, `conversations/${conversationId}/messages`);
-    const q = query(messagesRef, orderBy('createdAt', 'asc'));
+    const q = query(messagesRef, orderBy('createdAt', 'desc'));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       console.log(`[ChatScreen] Received ${snapshot.docs.length} new messages from Firestore.`);
@@ -28,7 +28,11 @@ const ChatScreen = ({ route }) => {
           avatar: doc.data().senderProfilePhoto,
         },
       }));
-      setMessages(previousMessages => GiftedChat.append(previousMessages, incomingMessages));
+      setMessages(previousMessages => {
+        // Filter out any duplicates which might have already been rendered
+        const newUniqueMessages = incomingMessages.filter(inMsg => !previousMessages.some(pm => pm._id === inMsg._id));
+        return GiftedChat.append(previousMessages, newUniqueMessages);
+    });
     });
 
     return () => {
@@ -106,17 +110,34 @@ const ChatScreen = ({ route }) => {
   );
 
   return (
-    <GiftedChat
-      messages={messages}
-      onSend={messages => onSend(messages)}
-      user={{ _id: user.uid, name: user.displayName, avatar: user.photoURL }}
-      renderBubble={renderBubble}
-      alwaysShowSend
-      renderSend={renderSend}
-      scrollToBottom
-      scrollToBottomComponent={scrollToBottomComponent}
-    />
+    // <View style={styles.container}>
+    // <GiftedChat
+    //   messages={messages}
+    //   onSend={messages => onSend(messages)}
+    //   user={{ _id: user.uid, name: user.displayName, avatar: user.photoURL }}
+    //   renderBubble={renderBubble}
+    //   alwaysShowSend
+    //   renderSend={renderSend}
+    //   scrollToBottom
+    //   scrollToBottomComponent={scrollToBottomComponent}
+    // />
+    // </View>
+      <View style={styles.container}>
+          <GiftedChat
+            messages={messages}
+            onSend={messages => onSend(messages)}
+            user={{ _id: user.uid, name: user.displayName, avatar: user.photoURL }}
+          />
+      </View>  
   );
 };
 
 export default ChatScreen;
+const styles = StyleSheet.create({
+  container: {
+      flex: 1, // Ensures the container expands to fill the screen
+      backgroundColor: 'white' // Helps visualize the container area
+  }
+});
+
+
