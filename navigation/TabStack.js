@@ -1,10 +1,11 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import ProfileStack from './ProfileStack';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import HomeStack from './HomeStack';
 import ChatStack from './ChatStack';
+import ProfileStack from './ProfileStack';
+import ProfileDrawer from './ProfileDrawerNav';
 
 const Tab = createBottomTabNavigator();
 
@@ -36,6 +37,7 @@ const MyTabs = () => {
                 tabBarIcon: ({ color, size }) => (
                     <MaterialCommunityIcons name="account" color={color} size={size} />
                 ),
+                headerShown: false,
               }}
             />
         </Tab.Navigator>

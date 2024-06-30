@@ -38,7 +38,6 @@ const ProfileScreen = ({ navigation }) => {
                     <Text style={styles.userInfoSubtitle}>Following</Text>
                 </View>
             </View>
-            <FormButton buttonTitle="Logout" onPress={() => logout()} />
         </ScrollView>
 
     );

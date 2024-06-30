@@ -1,6 +1,7 @@
 import React from 'react';
 import Providers from './navigation/index';
 import { MenuProvider } from 'react-native-popup-menu';
+import 'react-native-gesture-handler';
 
 const App = () => {
   return (
@@ -8,7 +9,6 @@ const App = () => {
       <Providers />
     </MenuProvider>
   );
-  //return <Providers />
 }
 
 export default App;
