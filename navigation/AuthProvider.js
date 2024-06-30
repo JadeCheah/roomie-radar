@@ -22,11 +22,8 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             if (currentUser && currentUser.displayName) {
-                console.log('User is logged in');
-                // Optionally set more user details from Firestore if needed
                 setUser(currentUser);
             } else {
-                console.log('No user logged in');
                 setUser(null);
             }
         });
