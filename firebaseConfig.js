@@ -30,7 +30,6 @@ if (!getApps().length) {
     auth = initializeAuth(app, {
       persistence: getReactNativePersistence(AsyncStorage),
     });
-    console.log("Firebase App initialized:", app);
   } catch (error) {
     console.log("Error initializing app: " + error);
   }
@@ -97,7 +96,6 @@ const uploadToFirebase = async (uri, name, onProgress) => {
 //Initialize Cloud Firestore and get a reference to the service
 const firestore = getFirestore(app);
 
-console.log("Firestore initialized:", firestore);
 const usersRef = collection(firestore, "users");
 
 export { app, auth, uploadToFirebase, firestore, usersRef };
