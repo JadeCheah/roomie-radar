@@ -26,7 +26,7 @@ const ProfileSetupScreen = ({ navigation }) => {
     ]);
 
     const handleCompleteProfile = async () => {
-        if (!username || !age || !gender) {
+        if (!username || !age || !gender || !housing) {
             Alert.alert('Error', 'Please fill in all required fields');
             return;
         }
@@ -91,7 +91,7 @@ const ProfileSetupScreen = ({ navigation }) => {
             />
 
             {/* below roommate preferences, not yet done, should include dropdown, slidebar, etc  */}
-            <Text style={styles.inputTitle}>Housing (optional)</Text>
+            <Text style={styles.inputTitle}>Housing *</Text>
             <DropDownPicker style={styles.dropdown}
                 placeholder='Select a housing option'
                 open={open}

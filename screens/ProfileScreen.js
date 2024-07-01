@@ -22,9 +22,12 @@ const ProfileScreen = ({ navigation }) => {
                 <TouchableOpacity style={styles.userBtn} onPress={() => navigation.navigate('Edit Profile')}>
                     <Text style={styles.userBtnText}>Edit Profile</Text>
                 </TouchableOpacity>
+                <TouchableOpacity style={styles.userBtn} onPress={() => navigation.navigate('Find Matches')}>
+                    <Text style={styles.userBtnText}>Find Matches</Text>
+                </TouchableOpacity>
             </View>
 
-            <View style={styles.userInfoContainer}>
+            {/* <View style={styles.userInfoContainer}>
                 <View style={styles.userInfoItem}>
                     <Text style={styles.userInfoTitle}>22</Text>
                     <Text style={styles.userInfoSubtitle}>Posts</Text>
@@ -37,7 +40,7 @@ const ProfileScreen = ({ navigation }) => {
                     <Text style={styles.userInfoTitle}>50</Text>
                     <Text style={styles.userInfoSubtitle}>Following</Text>
                 </View>
-            </View>
+            </View> */}
         </ScrollView>
 
     );
@@ -76,15 +79,17 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     userBtn: {
-        borderColor: '#2e64e5',
-        borderWidth: 2,
-        borderRadius: 3,
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        marginHorizontal: 5,
+        backgroundColor: '#2e64e5',
+        borderRadius: 10,
+        marginTop: 20,
+        paddingVertical: 10,
+        paddingHorizontal: 14,
+        marginHorizontal: 8,
     },
     userBtnText: {
-        color: '#2e64e5'
+        color: '#fff',
+        fontSize: 20,
+        marginHorizontal: 5,
     },
     userInfoContainer: {
         flexDirection: 'row',

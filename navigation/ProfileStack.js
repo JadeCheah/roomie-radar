@@ -6,6 +6,7 @@ import { UserProfileProvider } from './UserProfileContext';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Button, TouchableOpacity } from 'react-native';
 import ProfileDrawer from './ProfileDrawerNav';
+import FindMatchesScreen from '../screens/FindMatchesScreen';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const Stack = createStackNavigator();
@@ -35,6 +36,19 @@ const ProfileStack = ({ navigation }) => {
             <Stack.Screen
                 name="Edit Profile"
                 component={EditProfileScreen}
+                options={({ navigation }) => ({
+                    headerLeft: () => (
+                        <Button
+                            onPress={() => navigation.goBack()}
+                            title="< Back"
+                            color="#000"
+                        />
+                    ),
+                })}
+            />
+            <Stack.Screen
+                name="Find Matches"
+                component={FindMatchesScreen}
                 options={({ navigation }) => ({
                     headerLeft: () => (
                         <Button
