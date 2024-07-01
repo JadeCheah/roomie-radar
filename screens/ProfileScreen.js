@@ -88,8 +88,10 @@ const styles = StyleSheet.create({
     },
     userBtnText: {
         color: '#fff',
-        fontSize: 20,
+        fontSize: 18,
+        fontWeight: 'bold',
         marginHorizontal: 5,
+        fontFamily: 'Lato-Regular',
     },
     userInfoContainer: {
         flexDirection: 'row',
