@@ -32,7 +32,7 @@ const MyTabs = () => {
             />
             <Tab.Screen 
               name="Profile" 
-              component={ProfileStack} 
+              component={ProfileDrawer} 
               options={{
                 tabBarIcon: ({ color, size }) => (
                     <MaterialCommunityIcons name="account" color={color} size={size} />

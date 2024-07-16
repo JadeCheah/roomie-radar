@@ -1,17 +1,29 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import PreferencesScreen from '../screens/PreferencesScreen';
+import PreferencesStack from './PreferencesStack';
 import SettingsScreen from '../screens/SettingsScreen';
-
 import ProfileScreen from '../screens/ProfileScreen';
+import ProfileStack from './ProfileStack';
+import { useFocusEffect } from '@react-navigation/native';
 
 const Drawer = createDrawerNavigator();
 
-const ProfileDrawer = () => {
+const ProfileDrawer = ({navigation}) => {
+    useEffect (() => {
+        const unsubscribe = navigation.addListener('blur', () => {
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'Profile Stack' }],
+            });
+        });
+
+        return unsubscribe;
+    }, [navigation]);
+
     return (
-        <Drawer.Navigator initialRouteName='Profile' screenOptions={{drawerPosition:"right"}}>
-            <Drawer.Screen name="Profile" component={ProfileScreen} options={{ drawerLabel: 'Profile' }}/>
-            <Drawer.Screen name="Preferences Details" component={PreferencesScreen} options={{ drawerLabel: 'Preferences' }}/> 
+        <Drawer.Navigator initialRouteName='Profile Stack' screenOptions={{drawerPosition:"right"}}>
+            <Drawer.Screen name="Profile Stack" component={ProfileStack} options={{ drawerLabel: 'Profile', title: 'Profile'}}/>
+            <Drawer.Screen name="Preferences Details" component={PreferencesStack} options={{ drawerLabel: 'Preferences' }}/> 
             <Drawer.Screen name="Settings" component={SettingsScreen} options={{ drawerLabel: 'Settings' }}/> 
         </Drawer.Navigator>
     );

@@ -17,8 +17,8 @@ const ProfileStack = ({ navigation }) => {
             <Stack.Navigator initialRouteName='Profile Page'>
             <Stack.Screen
                 name="Profile Page"
-                component={ProfileDrawer}
-                options={{ headerShown: false }}
+                component={ProfileScreen}
+                options={{ headerShown: false}}
             />
             <Stack.Screen
                 name="Upload Photo"

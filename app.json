@@ -12,7 +12,10 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "runtimeVersion": {
+        "policy": "appVersion"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -20,7 +23,11 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.RoomieRadar",
-      "googleServicesFile":"./google-services.json"
+      "googleServicesFile": "./google-services.json",
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
+      "runtimeVersion": "1.0.0"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -33,6 +40,14 @@
           "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "83f10503-a595-42e4-b630-43ba737e56af"
+      }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/83f10503-a595-42e4-b630-43ba737e56af"
+    }
   }
 }
