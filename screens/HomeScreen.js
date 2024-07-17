@@ -1,58 +1,82 @@
-import React, { useContext } from "react";
-import { View, Text, StyleSheet, FlatList} from "react-native";
-
-import FormButton from "../components/FormButton";
-import { AuthContext } from "../navigation/AuthProvider";
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, StyleSheet, FlatList, TouchableOpacity, Text } from 'react-native';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { useAuth } from '../navigation/AuthProvider';
+import { firestore } from '../firebaseConfig';
 import PostCard from '../components/PostCard';
 
-import Ionicons from 'react-native-vector-icons/Ionicons';
+const HomeScreen = ({ navigation }) => {
+    const [posts, setPosts] = useState([]);
+    const { user } = useAuth();
 
-import {
-    Container,
-  } from "../styles/FeedStyles";
+    useEffect(() => {
+        const postsRef = collection(firestore, `posts`);
+        const q = query(postsRef, orderBy('postTime', 'desc'));
 
-const Posts = [
-    {
-      id: '1',
-      userName: 'Jenny Doe',
-      userImg: require('../assets/onboarding_1.png'),
-      postTime: '4 mins ago',
-      post:
-        'Hey there, this is my test for a post of my social app in React Native.',
-      postImg: require('../assets/onboarding_1.png'),
-      liked: true,
-      likes: '14',
-      comments: '5',
-    },
-    {
-      id: '2',
-      userName: 'John Doe',
-      userImg: require('../assets/onboarding2.webp'),
-      postTime: '2 hours ago',
-      post:
-        'Hey there, this is my test for a post of my social app in React Native.',
-      postImg: 'none',
-      liked: false,
-      likes: '8',
-      comments: '0',
-    },
-]
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            console.log(`[HomeScreen] Received ${snapshot.docs.length} new posts from Firestore.`);
+            const incomingPosts = snapshot.docs.map(doc => ({
+                _id: doc.id,
+                post: doc.data().post || '',
+                postImg: doc.data().postImg,
+                postTime: doc.data().postTime ? new Date(doc.data().postTime.seconds * 1000).toLocaleString() : new Date().toLocaleString(),
+                userImg: doc.data().userImg || 'default_avatar.png',  // Assuming a string URL
+                userName: doc.data().userName || '',
+                likes: doc.data().likes || 0,
+                comments: doc.data().comments || 0,
+                liked: doc.data().liked || false,
+            }));
+            setPosts(incomingPosts);
+        });
 
+        return () => {
+            console.log("[HomeScreen] Cleaning up posts listener.");
+            unsubscribe();
+        };
+    }, []);
 
-const HomeScreen = ({navigation}) => {
-  const { user, logout } = useContext(AuthContext);
-  return (
-    <Container>
-      <FlatList 
-      data ={Posts}
-      renderItem = {({item}) => <PostCard item = {item}/>}
-      keyExtractor={item=>item.id}
-      showsVerticalScrollIndicator = {false}
-      />
-      {/* <FormButton buttonTitle="Logout" onPress={() => logout()} /> */}
-      <FormButton buttonTitle="Post" onPress={() => {navigation.navigate("AddPost")}} />
-    </Container>
-  );
+    return (
+        <View style={styles.container}>
+            <TouchableOpacity onPress={() => navigation.navigate('AddPost')} style={styles.addButton}>
+                <Text style={styles.addButtonText}>+</Text>
+            </TouchableOpacity>
+            <FlatList
+                data={posts}
+                keyExtractor={item => item._id}
+                renderItem={({ item }) => {
+                console.log(item);
+                return <PostCard item={item} />}}
+                ItemSeparatorComponent={() => <View style={styles.separator} />}
+                showsVerticalScrollIndicator={false}
+            />
+          
+        </View>
+    );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        padding: 10
+    },
+    separator: {
+        height: 1,
+        width: "100%",
+        backgroundColor: "#ddd",
+        marginLeft: 60
+    },
+    addButton: {
+      padding: 10,
+      position: 'absolute',
+      right: 10,
+      top: 10,
+      zIndex: 1
+    },
+    addButtonText: {
+      fontSize: 24,
+      color: '#2e64e5'
+    }
+});
 
 export default HomeScreen;
