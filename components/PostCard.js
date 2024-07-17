@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, UserInfo, UserImg, UserName, UserInfoText, PostTime, PostText, InteractionWrapper, Interaction, InteractionText, Divider } from "../styles/FeedStyles";
-import { Image } from 'react-native';
+import { Card, UserInfo, UserImg, UserName, UserInfoText, PostTime, PostText, InteractionWrapper, Interaction, InteractionText } from "../styles/FeedStyles";
+import { Image, View } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const PostCard = ({ item }) => {
@@ -18,22 +18,21 @@ const PostCard = ({ item }) => {
                     <PostTime>{item.postTime}</PostTime>
                 </UserInfoText>
             </UserInfo>
-            {/* Image component for post image */}
-            {item.postImg && item.postImg !== 'none' && (
+            {item.postImg && item.postImg !== 'none' && item.postImg.trim() !== '' && (
                 <Image
                     source={{ uri: item.postImg }}
-                    style={{ width: '100%', height: 200 }} // Adjust style as needed
+                    style={{ width: '100%', height: 200, backgroundColor: 'transparent' }} // Ensure background is transparent
                     resizeMode="cover"
                 />
             )}
             <PostText>{item.post}</PostText>
             <InteractionWrapper>
                 <Interaction active={item.liked}>
-                    <Ionicons name={likeIcon} size={25} color={likeIconColor}/>
+                    <Ionicons name={likeIcon} size={25} color={likeIconColor} />
                     <InteractionText active={item.liked}>{likeText}</InteractionText>
                 </Interaction>
                 <Interaction>
-                    <Ionicons name='chatbubble-outline' size={25}/>
+                    <Ionicons name='chatbubble-outline' size={25} />
                     <InteractionText>{commentText}</InteractionText>
                 </Interaction>
             </InteractionWrapper>

@@ -4,13 +4,22 @@ import * as ImagePicker from 'expo-image-picker';
 import { uploadToFirebase } from '../firebaseConfig';
 // import { UserProfileContext } from '../navigation/UserProfileContext';
 
-const AddPostUploadPhotoScreen = ({navigation}) => {
+const AddPostUploadPhotoScreen = ({navigation, route}) => {
     // const { profile, updateUserProfile } = useContext(UserProfileContext);
 
     const [cameraPermission, requestCameraPermission] = ImagePicker.useCameraPermissions();
     const [libraryPermission, requestLibraryPermission] = ImagePicker.useMediaLibraryPermissions();
     const [imageUri, setImageUri] = useState(null);
     const [uploading, setUploading] = useState(false);
+
+    const { onPhotoSelected } = route.params;  // Make sure to destructure route from props
+
+// Call this function when the photo is confirmed uploaded or selected
+const handlePhotoSelected = (uri) => {
+    console.log("Selected image URI: ", uri);
+    onPhotoSelected(uri);  // This sets the state in AddPostScreen
+    navigation.goBack();   // Optionally navigate back after selection
+};
 
     useEffect(() => {
         (async () => {
@@ -34,6 +43,7 @@ const AddPostUploadPhotoScreen = ({navigation}) => {
                 if ( !cameraResponse.canceled ) {
                     const { uri } = cameraResponse.assets[0];
                     setImageUri(uri);
+                    handlePhotoSelected(uri)
                 }
             } else {
                 Alert.alert('Camera permission not granted');

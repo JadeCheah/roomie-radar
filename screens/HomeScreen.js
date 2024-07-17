@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, FlatList } from 'react-native';
+import { View, StyleSheet, FlatList, TouchableOpacity, Text } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { useAuth } from '../navigation/AuthProvider';
 import { firestore } from '../firebaseConfig';
 import PostCard from '../components/PostCard';
 
-const HomeScreen = ({ route }) => {
+const HomeScreen = ({ navigation }) => {
     const [posts, setPosts] = useState([]);
     const { user } = useAuth();
 
@@ -38,6 +38,9 @@ const HomeScreen = ({ route }) => {
 
     return (
         <View style={styles.container}>
+            <TouchableOpacity onPress={() => navigation.navigate('AddPost')} style={styles.addButton}>
+                <Text style={styles.addButtonText}>+</Text>
+            </TouchableOpacity>
             <FlatList
                 data={posts}
                 keyExtractor={item => item._id}
@@ -47,6 +50,7 @@ const HomeScreen = ({ route }) => {
                 ItemSeparatorComponent={() => <View style={styles.separator} />}
                 showsVerticalScrollIndicator={false}
             />
+          
         </View>
     );
 };
@@ -61,6 +65,17 @@ const styles = StyleSheet.create({
         width: "100%",
         backgroundColor: "#ddd",
         marginLeft: 60
+    },
+    addButton: {
+      padding: 10,
+      position: 'absolute',
+      right: 10,
+      top: 10,
+      zIndex: 1
+    },
+    addButtonText: {
+      fontSize: 24,
+      color: '#2e64e5'
     }
 });
 

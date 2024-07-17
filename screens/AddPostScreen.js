@@ -1,52 +1,31 @@
-// import React, { useContext } from "react";
-// import { View, Text, StyleSheet, FlatList, TouchableOpacity} from "react-native";
-// import FormButton from '../components/FormButton';
-
-// const AddPostScreen = ({navigation}) => {
-
-//     return (
-//         <View style={styles.container}>
-//             <Text style={styles.text}>What's On Your Mind?</Text>
-//             <FormButton buttonTitle="Add Photo" onPress={() => navigation.navigate("AddPostPhoto")}></FormButton>
-//         </View>
-//     );
-// };
-
-// export default AddPostScreen;
-
-// const styles = StyleSheet.create({
-//     container: {
-//         alignItems: 'center',
-//         marginHorizontal: 20
-//     },
-//     text: {
-//         font: 1,
-//         marginTop: 100
-//     }
-// }) 
-
 import React, { useState, useContext } from "react";
 import { View, TextInput, StyleSheet } from "react-native";
 import FormButton from '../components/FormButton';
 import { firestore } from '../firebaseConfig';
 import { AuthContext } from "../navigation/AuthProvider";
+import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from 'firebase/firestore';
+
 
 const AddPostScreen = ({ navigation }) => {
     const [postText, setPostText] = useState('');
+    const [postImg, setPostImg] = useState('');
     const { user } = useContext(AuthContext);
 
     const handleAddPost = async () => {
         if (postText.length > 0) {
-            await firestore.collection('posts').add({
+            console.log(firestore);
+            await addDoc(collection(firestore, 'posts'),{
                 userName: user.displayName,
                 userImg: user.photoURL,
                 postTime: new Date(),
                 post: postText,
-                postImg: null, // This will be null until an image is added
+                postImg: postImg, 
                 liked: false,
                 likes: 0,
                 comments: 0,
             });
+            setPostText('');
+            setPostImg('');  // Reset image URI after posting
             navigation.goBack();
         }
     };
@@ -58,9 +37,12 @@ const AddPostScreen = ({ navigation }) => {
                 style={styles.textInput}
                 value={postText}
                 onChangeText={setPostText}
-                multiline
+                
             />
             <FormButton buttonTitle="Post" onPress={handleAddPost} />
+            <FormButton 
+            buttonTitle="Add Photo" 
+            onPress={() => navigation.navigate('AddPostPhoto', { onPhotoSelected: setPostImg })} />
         </View>
     );
 };
