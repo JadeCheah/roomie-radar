@@ -5,7 +5,7 @@ import EditProfileScreen from '../screens/EditProfileScreen';
 import { UserProfileProvider } from './UserProfileContext';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Button, TouchableOpacity } from 'react-native';
-import ProfileDrawer from './ProfileDrawerNav';
+// import ProfileDrawer from './ProfileDrawerNav';
 import FindMatchesScreen from '../screens/FindMatchesScreen';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
