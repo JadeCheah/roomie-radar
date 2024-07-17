@@ -19,10 +19,10 @@ const HomeScreen = ({ navigation }) => {
             const incomingPosts = snapshot.docs.map(doc => ({
                 _id: doc.id,
                 post: doc.data().post || '',
-                postImg: doc.data().postImg || 'default_postPhoto.png',
+                postImg: doc.data().postImg,
                 postTime: doc.data().postTime ? new Date(doc.data().postTime.seconds * 1000).toLocaleString() : new Date().toLocaleString(),
                 userImg: doc.data().userImg || 'default_avatar.png',  // Assuming a string URL
-                userName: doc.data().userName || 'Anonymous',
+                userName: doc.data().userName || '',
                 likes: doc.data().likes || 0,
                 comments: doc.data().comments || 0,
                 liked: doc.data().liked || false,

@@ -18,7 +18,7 @@ const PostCard = ({ item }) => {
                     <PostTime>{item.postTime}</PostTime>
                 </UserInfoText>
             </UserInfo>
-            {item.postImg && item.postImg !== 'none' && item.postImg.trim() !== '' && (
+            {item.postImg && item.postImg !== null && item.postImg.trim() !== '' && (
                 <Image
                     source={{ uri: item.postImg }}
                     style={{ width: '100%', height: 200, backgroundColor: 'transparent' }} // Ensure background is transparent
