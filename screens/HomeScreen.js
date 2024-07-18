@@ -5,13 +5,15 @@ import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from 
 import { useAuth } from '../navigation/AuthProvider';
 import { firestore } from '../firebaseConfig';
 import PostCard from '../components/PostCard';
+import { doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+
 
 const HomeScreen = ({ navigation }) => {
     const [posts, setPosts] = useState([]);
     const { user } = useAuth();
 
     useEffect(() => {
-        const postsRef = collection(firestore, `posts`);
+        const postsRef = collection(firestore, "posts");
         const q = query(postsRef, orderBy('postTime', 'desc'));
 
         const unsubscribe = onSnapshot(q, (snapshot) => {

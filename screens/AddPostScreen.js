@@ -1,3 +1,4 @@
+
 import React, { useState, useContext } from "react";
 import { View, TextInput, StyleSheet } from "react-native";
 import FormButton from '../components/FormButton';
@@ -21,7 +22,7 @@ const AddPostScreen = ({ navigation }) => {
                 post: postText,
                 postImg: postImg, 
                 liked: false,
-                likes: 0,
+                likes: [],
                 comments: 0,
             });
             setPostText('');
