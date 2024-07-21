@@ -14,6 +14,8 @@ export const defaultProfilePhoto = Image.resolveAssetSource(
 
 const UserProfileProvider = ({children}) => {
 
+    const [loading, setLoading] = useState(true);
+
     const[profile, setProfile] = useState({
         userName: 'New User',
         userIntro: 'User Introduction',
@@ -44,6 +46,8 @@ const UserProfileProvider = ({children}) => {
                     }
                 } catch (error) {
                     console.error('Failed to load profile', error);
+                } finally {
+                    setLoading(false);
                 }
             }
 
@@ -108,7 +112,7 @@ const UserProfileProvider = ({children}) => {
     };
 
     return (
-        <UserProfileContext.Provider value={{ profile, updateUserProfile }}>
+        <UserProfileContext.Provider value={{ profile, updateUserProfile, loading }}>
             {children}
         </UserProfileContext.Provider>
     );

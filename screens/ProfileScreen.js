@@ -3,10 +3,19 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'rea
 import { UserProfileContext } from '../navigation/UserProfileContext';
 import { AuthContext } from "../navigation/AuthProvider";
 import FormButton from '../components/FormButton';
+import { ActivityIndicator } from 'react-native-paper';
 
 const ProfileScreen = ({ navigation }) => {
-    const { profile } = useContext(UserProfileContext);
-    const { logout } = useContext(AuthContext);
+    const { profile, loading } = useContext(UserProfileContext);
+
+    if (loading) {
+        return (
+            <View style={styles.loaderContainer}>
+                <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+        );
+    }
+
 
     return (
         <ScrollView
@@ -112,5 +121,10 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: '#666',
         textAlign: 'center'
+    },
+    loaderContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });

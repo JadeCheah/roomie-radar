@@ -10,7 +10,6 @@ import DropDownPicker from 'react-native-dropdown-picker';
 const ProfileSetupScreen = ({ navigation }) => {
     const [username, setUsername] = useState('');
     const [age, setAge] = useState('');
-    // const [preferences, setPreferences] = useState('');
     const [gender, setGender] = useState('');
 
     //Dropdown menu for housing option
