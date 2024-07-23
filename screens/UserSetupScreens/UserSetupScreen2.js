@@ -1,33 +1,30 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, ScrollView, Button, StyleSheet, TextInput, Picker, Alert } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import { Button, View, Text, TextInput, Alert, StyleSheet, ScrollView, SafeAreaView, Picker } from 'react-native';
 import { auth, firestore } from '../../firebaseConfig';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { updateProfile } from 'firebase/auth';
+import FormButton from '../../components/FormButton';
 import { ActivityIndicator, SegmentedButtons } from 'react-native-paper';
 import DropDownPicker from 'react-native-dropdown-picker';
-import FormButton from '../../components/FormButton';
+import { UserSetupContext } from '../../contexts/UserSetupContext';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Slider from '@react-native-community/slider';
-import { windowWidth } from '../../utils/Dimensions';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { PreferencesContext } from '../../contexts/PreferencesContext';
+import { windowWidth } from '../../utils/Dimensions';
 
 
-const PreferencesScreen2 = ({ navigation }) => {
+const UserSetupScreen2 = ({ navigation }) => {
 
-    const { tempPreferences, updateTempPreferences, savePreferences, saving } = useContext(PreferencesContext);
-    const handleChange = (name, value) => {
-        updateTempPreferences({ [name]: value });
-    };
-
-    //sleep category
+    const { tempDetails, updateTempDetails, handleCompleteProfile } = useContext(UserSetupContext);
+    
     const handleTimeChange = (name, event, date) => {
         if (event.type === 'set' && date) {
-            console.log('Raw date:', date);
+            // console.log('Raw date:', date);
             if (date instanceof Date && !isNaN(date)) {
-                const hours = date.getHours().toString().padStart(2, '0');
+                const hours = date.getHours().toString().padStart(2,'0');
                 const minutes = date.getMinutes().toString().padStart(2, '0');
-                console.log(`Formatted time: ${hours}:${minutes}`);
-                updateTempPreferences({ [name]: `${hours}:${minutes}` });
+                // console.log(`Formatted time: ${hours}:${minutes}`);
+                updateTempDetails({ [name]: `${hours}:${minutes}`});
             } else {
                 console.error('Invalid date object: ', date);
             }
@@ -36,7 +33,7 @@ const PreferencesScreen2 = ({ navigation }) => {
 
     const parseTime = (timeStr) => {
         if (typeof timeStr !== 'string' || !timeStr.includes(':')) {
-            console.error('Invalid time string:', timeStr);
+            console.error('Invalid time string:' , timeStr);
             return new Date(); //return current date as fallback
         }
         const [hours, minutes] = timeStr.split(':').map(Number);
@@ -48,12 +45,16 @@ const PreferencesScreen2 = ({ navigation }) => {
         return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
     };
 
+    const handleChange = (name, value) => {
+        updateTempDetails({ [name]: value });
+    };
+
     //sleep flexibility
     const sleepFlexesArray = ['Not flexible', 'Somewhat flexible', 'Highly flexible'];
     const showSleepFlex = (sliderValue) => {
         return sleepFlexesArray[Math.round(sliderValue * 2)];
     };
-
+    //sleep lights on/off
     const formatSetSleepLight = (sliderValue) => {
         if (sliderValue === 0) {
             handleChange('sleepLightsOnOff', 'Lights off');
@@ -73,17 +74,26 @@ const PreferencesScreen2 = ({ navigation }) => {
         }
     };
 
-    //for other preferences 
-    const [tidiness, setTidiness] = useState('');
+    const handleCompletion = async () => {
+        try {
+            const result = await handleCompleteProfile();
+            if (result !== null) {
+                navigation.navigate('TabStack');
+            }
+        } catch (error) {
+            console.error('Error completing profile: ', error);
+            Alert.alert('Error', 'There was an error completing your profile. Please try again.');
+        }
+    };
 
     return (
-        <ScrollView>
-            <View style={styles.container}>
-                <Text style={styles.label}>Your Preferred Sleep Schedule :</Text>
+        <View style={styles.container}>
+            <View style={styles.subContainer}>
+                <Text style={styles.inputTitle}>What is your preferred sleep schedule ?</Text>
                 <View style={styles.sleepContainer}>
                     <Text>Your Sleep Time :</Text>
                     <DateTimePicker
-                        value={parseTime(tempPreferences.sleepTimeStart)}
+                        value={parseTime(tempDetails.sleepTimeStart)}
                         mode="time"
                         is24Hour={true}
                         display="default"
@@ -91,7 +101,7 @@ const PreferencesScreen2 = ({ navigation }) => {
                     />
                     <Text style={styles.toText}> to </Text>
                     <DateTimePicker
-                        value={parseTime(tempPreferences.sleepTimeEnd)}
+                        value={parseTime(tempDetails.sleepTimeEnd)}
                         mode="time"
                         is24Hour={true}
                         display="default"
@@ -101,7 +111,7 @@ const PreferencesScreen2 = ({ navigation }) => {
                 <View style={styles.sleepContainer}>
                     <Text >Your Wake Time :</Text>
                     <DateTimePicker
-                        value={parseTime(tempPreferences.wakeUpTimeStart)}
+                        value={parseTime(tempDetails.wakeUpTimeStart)}
                         mode="time"
                         is24Hour={true}
                         display="default"
@@ -109,83 +119,138 @@ const PreferencesScreen2 = ({ navigation }) => {
                     />
                     <Text style={styles.toText}> to </Text>
                     <DateTimePicker
-                        value={parseTime(tempPreferences.wakeUpTimeEnd)}
+                        value={parseTime(tempDetails.wakeUpTimeEnd)}
                         mode="time"
                         is24Hour={true}
                         display="default"
                         onChange={(event, date) => handleTimeChange('wakeUpTimeEnd', event, date)}
                     />
                 </View>
-                <Text style={styles.label}>How flexible are you with your sleep schedule?</Text>
+            </View>
+            <View style={styles.subContainer}>
+                <Text style={styles.inputTitle}>How flexible are you with your sleep schedule?</Text>
                 <View style={styles.sliderCont}>
                     <Slider
                         style={{ width: windowWidth * 0.9, height: 40 }}
-                        value={tempPreferences.sleepScheduleFlexibility}
+                        value={tempDetails.sleepScheduleFlexibility}
                         minimumValue={0}
                         maximumValue={1}
                         onValueChange={(value) => handleChange('sleepScheduleFlexibility', value)}
                         step={0.5}
                     />
-                    <Text style={{ fontSize: 18 }}>{showSleepFlex(tempPreferences.sleepScheduleFlexibility)}</Text>
+                    <Text style={{ fontSize: 18 }}>{showSleepFlex(tempDetails.sleepScheduleFlexibility)}</Text>
                 </View>
-                <Text style={styles.label}>Do you prefer to sleep with lights on/off?</Text>
+            </View>
+            <View style={styles.subContainer2}>
+                <Text style={styles.inputTitle}>Do you prefer to sleep with lights on/off?</Text>
                 <View style={styles.lightCont}>
-                    {tempPreferences.sleepLightsOnOff === "Lights off" && <MaterialCommunityIcons name='lightbulb-off' size='50' />}
-                    {tempPreferences.sleepLightsOnOff === "No preference" && <MaterialCommunityIcons name='lightbulb-multiple-outline' size='50'
+                    {tempDetails.sleepLightsOnOff === "Lights off" && <MaterialCommunityIcons name='lightbulb-off' size='50' />}
+                    {tempDetails.sleepLightsOnOff === "No preference" && <MaterialCommunityIcons name='lightbulb-multiple-outline' size='50'
                         style={{ color: '#ada693' }} />}
-                    {tempPreferences.sleepLightsOnOff === "Lights on" && <MaterialCommunityIcons name='lightbulb-on' size='50'
+                    {tempDetails.sleepLightsOnOff === "Lights on" && <MaterialCommunityIcons name='lightbulb-on' size='50'
                         style={{ color: '#faba0a' }} />}
                 </View>
                 <View style={styles.sliderCont}>
                     <Slider
                         style={{ width: windowWidth * 0.9, height: 40 }}
-                        value={sleepLightStringToNum(tempPreferences.sleepLightsOnOff)}
+                        value={sleepLightStringToNum(tempDetails.sleepLightsOnOff)}
                         minimumValue={0}
                         maximumValue={1}
-                        onValueChange={(sliderValue) => { formatSetSleepLight(sliderValue) }}
+                        onValueChange={(sliderValue) => formatSetSleepLight(sliderValue)}
                         step={0.5}
                     />
-                    <Text style={{ fontSize: 18}}>{tempPreferences.sleepLightsOnOff}</Text>
+                    <Text style={{ fontSize: 18 }}>{tempDetails.sleepLightsOnOff}</Text>
                 </View>
-                {saving && <ActivityIndicator size="small" color="#0000ff" />}
-                <FormButton buttonTitle="Save Preferences" onPress={savePreferences} />
             </View>
-        </ScrollView>
+            <FormButton buttonTitle="Complete Profile" onPress={handleCompletion} />
+        </View>
     );
 }
 
-export default PreferencesScreen2;
+export default UserSetupScreen2;
 
 const styles = StyleSheet.create({
     container: {
         flexGrow: 1,
-        paddingVertical: '3%',
+        paddingVertical: 20,
         paddingHorizontal: 18,
         justifyContent: 'space-between',
+        alignItems: 'center'
+    },
+    subContainer: {
+        paddingVertical: 20,
+        flexGrow: 1,
+        justifyContent: 'space-between'
+    },
+    subContainer2: {
+        paddingVertical: 20,
+        flexGrow: 1,
+        justifyContent: 'space-between',
+    },
+    inputTitle: {
+        fontFamily: 'AlNile-Bold',
+        fontSize: 18,
+        textAlign: 'center',
+    },
+    text: {
+        fontSize: 20,
     },
     label: {
-        padding: 3,
         fontSize: 20,
         fontFamily: 'Lato-Regular',
-        marginBottom: 8, //Add margin for spacing
-        fontWeight: 'bold',
+        marginBottom: 10, //Add margin for spacing
+        fontWeight: 'bold'
     },
-    sliderCont: {
-        flexDirection: 'column',
-        alignItems: 'center',
-        padding: '4%',
+    input: {
+        height: 40,
+        borderColor: 'gray',
+        borderWidth: 1,
+        paddingHorizontal: 10,
+        borderRadius: 8,
+        marginBottom: 20,
     },
-    lightCont: {
+    segButt: {
+        marginBottom: 20,
+    },
+    checkedButt: {
+        backgroundColor: '#bdd3fc',
+    },
+    uncheckedButt: {
+        backgroundColor: '#fff',
+    },
+    dropdown: {
+        marginBottom: 20,
+    },
+    loaderContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
     },
+    savingIndicator: {
+        marginTop: 10,
+    },
     sleepContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: '9%',
+        marginBottom: 20,
     },
     toText: {
         marginLeft: 10,
     },
-})
+    buttContainer: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        padding: 10,
+    },
+    sliderCont: {
+        flexDirection: 'column',
+        alignItems: 'center',
+    },
+    lightCont: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+});
+

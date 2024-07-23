@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, ScrollView, Button, StyleSheet, TextInput, Picker, Alert } from 'react-native';
+import React, { useState, useEffect, useContext, useLayoutEffect } from 'react';
+import { View, Text, ScrollView, Button, StyleSheet, TextInput, Picker, Alert, TouchableOpacity } from 'react-native';
 import { auth, firestore } from '../../firebaseConfig';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { ActivityIndicator, SegmentedButtons } from 'react-native-paper';
@@ -11,23 +11,32 @@ import { windowWidth } from '../../utils/Dimensions';
 import { PreferencesContext } from '../../contexts/PreferencesContext';
 import { useNavigation } from '@react-navigation/native';
 
+const CustomNextButton = ({ navigation }) => {
+    return (
+        <TouchableOpacity onPress={() => navigation.navigate('Preferences 2')} style={styles.nextButton}>
+            <Text style={{ color: '#007AFF', fontSize: 18 }}>Sleep {`>`}</Text>
+        </TouchableOpacity>
+    );
+};
 
 const PreferencesScreen1 = ({ navigation }) => {
-    const { tempPreferences, updateTempPreferences } = useContext(PreferencesContext);
+    const { tempPreferences, updateTempPreferences, loading, saving } = useContext(PreferencesContext);
+    //for navigation
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerRight: () => <CustomNextButton navigation={navigation} />,
+        });
+    }, [navigation]);
 
     const handleChange = (name, value) => {
         updateTempPreferences({ [name]: value });
     };
-    
-    //sleep flexibility
-    const sleepFlexesArray = ['Not flexible', 'Somewhat flexible', 'Highly flexible'];
-    const showSleepFlex = (sliderValue) => {
-        return sleepFlexesArray[sliderValue * 2];
-    };
+    //housing stuff
+    const [housingOption, setHousingOption] = useState(tempPreferences.housing);
 
-    //For loading circle 
-    const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
+    useEffect(() => {
+        setHousingOption(tempPreferences.housing);
+    }, [tempPreferences.housing]);
 
     //Dropdown menu for housing option
     const [open, setOpen] = useState(false);
@@ -39,15 +48,16 @@ const PreferencesScreen1 = ({ navigation }) => {
         { label: 'King Edward VII Hall', value: 'ke7' },
         { label: 'Raffles Hall', value: 'raffles' },
     ]);
-    
-    // if (loading) {
-    //     return (
-    //         <View style={styles.loaderContainer}>
-    //             <ActivityIndicator size="large" color="#0000ff" />
-    //         </View>
-    //     );
-    // }
 
+    console.log("Loading state:", loading); //debuggging line 
+    
+    if (loading) {
+        return (
+            <View style={styles.loaderContainer}>
+                <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+        );
+    }
 
     return (
         <View style={styles.container}>
@@ -74,69 +84,19 @@ const PreferencesScreen1 = ({ navigation }) => {
             <DropDownPicker style={styles.dropdown}
                 placeholder='Select a housing option'
                 open={open}
-                value={tempPreferences.housing}
+                value={housingOption}
                 items={items}
                 setOpen={setOpen}
-                setValue={(value) => handleChange('housing', value)}
+                setValue={(callback) => { 
+                    const value = callback(housingOption);
+                    setHousingOption(value); 
+                    handleChange('housing', value);
+                }}
                 setItems={setItems}
             />
-
-            <Text style={styles.label}>Your Preferred Sleep Schedule :</Text>
-            <View style={styles.sleepContainer}>
-                <Text>Your Sleep Time :</Text>
-                <DateTimePicker
-                    value={tempPreferences.sleepTimeStart}
-                    mode="time"
-                    is24Hour={true}
-                    display="default"
-                    onChange={(value) => handleChange('sleepTimeStart', value)}
-                />
-                <Text style={styles.toText}> to </Text>
-                <DateTimePicker
-                    value={tempPreferences.sleepTimeEnd}
-                    mode="time"
-                    is24Hour={true}
-                    display="default"
-                    onChange={(value) => handleChange('sleepTimeEnd', value)}
-                />
-            </View>
-            <View style={styles.sleepContainer}>
-                <Text >Your Wake Time :</Text>
-                <DateTimePicker
-                    value={tempPreferences.wakeUpTimeStart}
-                    mode="time"
-                    is24Hour={true}
-                    display="default"
-                    onChange={(value) => handleChange('wakeUpTimeStart', value)}
-                />
-                <Text style={styles.toText}> to </Text>
-                <DateTimePicker
-                    value={tempPreferences.wakeUpTimeEnd}
-                    mode="time"
-                    is24Hour={true}
-                    display="default"
-                    onChange={(value) => handleChange('wakeUpTimeEnd', value)}
-                />
-            </View>
-            <Text style={styles.label}>How flexible are you with your sleep schedule?</Text>
-            <View style={styles.sliderCont}>
-                <Slider
-                    style={{ width: windowWidth * 0.9, height: 40 }}
-                    value={tempPreferences.sleepScheduleFlexibility}
-                    minimumValue={0}
-                    maximumValue={1}
-                    onValueChange={(value) => handleChange('sleepScheduleFlexibility', value)}
-                    step={0.5}
-                />
-                <Text style={{ fontSize: 18 }}>{showSleepFlex(tempPreferences.sleepScheduleFlexibility)}</Text>
-            </View>
-            {saving && (
-                <ActivityIndicator size="small" color="#0000ff" style={styles.savingIndicator} />
-            )}
             <View style={styles.buttContainer}>
                 <FormButton buttonTitle="Next" onPress={() => navigation.navigate('Preferences 2')} />
             </View>
-            {/* <FormButton buttonTitle="Save Preferences" onPress={savePreferences} /> */}
         </View>
     );
 }
@@ -145,8 +105,8 @@ export default PreferencesScreen1;
 
 const styles = StyleSheet.create({
     container: {
-        flexGrow: 1,
-        paddingVertical: 15,
+        flexGrow: 0.8,
+        paddingVertical: 50,
         paddingHorizontal: 18,
         justifyContent: 'space-between',
     },
@@ -177,7 +137,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
     },
     dropdown: {
-        marginBottom: 20,
+    
     },
     loaderContainer: {
         flex: 1,
@@ -196,15 +156,8 @@ const styles = StyleSheet.create({
         marginLeft: 10,
     },
     buttContainer: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        padding: 10,
     },
-    sliderCont: {
-        flexDirection: 'column',
-        alignItems: 'center',
-        paddingBottom: 70,
-    },
+    nextButton: {
+        marginRight: 10,
+    }
 })

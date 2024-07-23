@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { auth, firestore } from '../firebaseConfig';
-import { doc, getDoc, setDoc, updateDoc, collection } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 
 const PreferencesContext = createContext();
 
@@ -10,41 +10,84 @@ const PreferencesProvider = ({ children }) => {
         age: '',
         gender: '',
         housing: '',
-        sleepTimeStart: new Date(1598051730000),
-        sleepTimeEnd: new Date(1598051730000),
-        wakeUpTimeStart: new Date(1598051730000),
-        wakeUpTimeEnd: new Date(1598051730000),
+        sleepTimeStart: '00:00',
+        sleepTimeEnd: '00:00',
+        wakeUpTimeStart: '00:00',
+        wakeUpTimeEnd: '00:00',
         sleepScheduleFlexibility: 0,
-        sleepLightsOnOff: 'No Preference',
+        sleepLightsOnOff: 'No preference',
     });
 
     const [tempPreferences, setTempPreferences] = useState(preferences);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
 
     useEffect(() => {
-        const loadPreferences = async() => {
+        const loadPreferences = async () => {
             const user = auth.currentUser;
             if (user) {
+                setLoading(true);
                 try {
-                    const mainDoc = await getDoc(doc(firestore, 'users', user.uid, 'preferences', 'main'));
-                    const sleepDoc = await getDoc(doc(firestore, 'users', user.uid, 'preferences', 'sleep'));
-                    // const tidinessDoc = await getDoc(dc(firestore, 'users', user.uid, 'preferences', 'tidiness'));
-                
-                    let loadedPreferences = {};
-                    if (mainDoc.exists()) loadedPreferences = {...loadedPreferences, ...mainDoc.data() };
-                    if (sleepDoc.exists()) loadedPreferences = {...loadedPreferences, ...sleepDoc.data() };
-                    // if (tidinessDoc.exists()) loadedPreferences = {...loadedPreferences, ...tidinessDoc.data() };
+                    const mainRef = doc(firestore, 'users', user.uid, 'preferences', 'main');
+                    const sleepRef = doc(firestore, 'users', user.uid, 'preferences', 'sleep');
 
-                    setPreferences(loadedPreferences);
-                    setTempPreferences(loadedPreferences);
+                    const validateTimeString = (timeStr) => {
+                        if (typeof timeStr === 'string' && /^([01]\d|2[0-3]):([0-5]\d)$/.test(timeStr)) {
+                            return timeStr;
+                        }
+                        console.warn(`Invalid time string: ${timeStr}, defaulting to 00:00`);
+                        return '00:00';
+                    }
+
+                    const unsubscribeMain = onSnapshot(mainRef, (doc) => {
+                        if (doc.exists()) {
+                            const mainData = doc.data();
+                            const validatedData = {
+                                ...mainData, 
+                                age: mainData.age || '',
+                                gender: mainData.gender || '',
+                                housing: mainData.housing || '',
+                            };
+                            setPreferences((prev) => ({ ...prev, ...validatedData }));
+                            setTempPreferences((prev) => ({ ...prev, ...validatedData }));
+                        }
+                    });
+
+                    const unsubscribeSleep = onSnapshot(sleepRef, (doc) => {
+                        if (doc.exists()) {
+                            const sleepData = doc.data();
+                            const validatedData = {
+                                sleepTimeStart: validateTimeString(sleepData.sleepTimeStart),
+                                sleepTimeEnd: validateTimeString(sleepData.sleepTimeEnd),
+                                wakeUpTimeStart: validateTimeString(sleepData.wakeUpTimeStart),
+                                wakeUpTimeEnd: validateTimeString(sleepData.wakeUpTimeEnd),
+                                sleepScheduleFlexibility: sleepData.sleepScheduleFlexibility || 0,
+                                sleepLightsOnOff: sleepData.sleepLightsOnOff || 'No preference',
+                            }
+                            setPreferences((prev) => ({ ...prev, ...validatedData }));
+                            setTempPreferences((prev) => ({ ...prev, ...validatedData }));
+                        }
+                    });
+
+                    //cleanup subscriptions on unmount 
+                    return () => {
+                        unsubscribeMain();
+                        unsubscribeSleep();
+                    };
                 } catch (error) {
-                    console.error("Error loading preferences", error);
+                    console.error('Error loading preferences', error);
+                } finally {
+                    setLoading(false);
                 }
+            } else {
+                setLoading(false);
             }
         };
 
         loadPreferences();
 
     }, [auth.currentUser]);
+
 
     const updateTempPreferences = (newPreferences) => {
         setTempPreferences((prevPreferences) => ({
@@ -53,32 +96,42 @@ const PreferencesProvider = ({ children }) => {
         }));
     };
 
-    const savePreferences = async() => {
+    const savePreferences = async () => {
         const user = auth.currentUser;
         if (user) {
+            setSaving(true);
             try {
                 const mainRef = doc(firestore, 'users', user.uid, 'preferences', 'main');
                 const sleepRef = doc(firestore, 'users', user.uid, 'preferences', 'sleep');
                 // const tidinessRef = doc(firestore, 'users', user.uid, 'preferences', 'tidiness');
-                
+
                 //setDoc main
-                await setDoc(mainRef, { age: tempPreferences.age, gender: tempPreferences.gender, 
-                    housing: tempPreferences.housing }, { merge: true });
-                
+                await setDoc(mainRef, {
+                    age: tempPreferences.age,
+                    gender: tempPreferences.gender,
+                    housing: tempPreferences.housing
+                }, { merge: true });
+
                 //setDoc sleep
-                await setDoc(sleepRef, { sleepTimeStart: tempPreferences.sleepTimeStart, sleepTimeEnd: tempPreferences.sleepTimeEnd,
-                    wakeUpTimeStart: tempPreferences.wakeUpTimeStart, wakeUpTimeEnd: tempPreferences.wakeUpTimeEnd,
-                    sleepScheduleFlexibility: tempPreferences.sleepScheduleFlexibility, 
-                    sleepLightsOnOff: tempPreferences.sleepLightsOnOff }, { merge: true });
+                await setDoc(sleepRef, {
+                    sleepTimeStart: tempPreferences.sleepTimeStart,
+                    sleepTimeEnd: tempPreferences.sleepTimeEnd,
+                    wakeUpTimeStart: tempPreferences.wakeUpTimeStart,
+                    wakeUpTimeEnd: tempPreferences.wakeUpTimeEnd,
+                    sleepScheduleFlexibility: tempPreferences.sleepScheduleFlexibility,
+                    sleepLightsOnOff: tempPreferences.sleepLightsOnOff
+                }, { merge: true });
                 //this part ignore first, haven't implemented yet 
                 // await setDoc(tidinessRef, { age: tempPreferences.age, gender: tempPreferences.gender, 
                 //     housing: tempPreferences.housing }, { merge: true });
-            } catch(error) {
+            } catch (error) {
                 console.error("Error saving preferences: ", error);
+            } finally {
+                setSaving(false);
             }
         }
     };
-                
+
     // const updatePreferences = async (newPreferences) => {
     //     const user = auth.currentUser;
     //     if (user) {
@@ -96,7 +149,7 @@ const PreferencesProvider = ({ children }) => {
     // };
 
     return (
-        <PreferencesContext.Provider value={{ preferences, tempPreferences, updateTempPreferences, savePreferences }}>
+        <PreferencesContext.Provider value={{ tempPreferences, updateTempPreferences, savePreferences, loading, saving }}>
             {children}
         </PreferencesContext.Provider>
 

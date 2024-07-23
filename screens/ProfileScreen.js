@@ -16,7 +16,6 @@ const ProfileScreen = ({ navigation }) => {
         );
     }
 
-
     return (
         <ScrollView
             style={styles.container}
