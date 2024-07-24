@@ -26,7 +26,7 @@ const HomeScreen = ({ navigation }) => {
                 userImg: doc.data().userImg || 'default_avatar.png',  // Assuming a string URL
                 userName: doc.data().userName || '',
                 likes: doc.data().likes || 0,
-                comments: doc.data().comments || 0,
+                commentsCount: doc.data().commentsCount,
                 liked: doc.data().liked || false,
             }));
             setPosts(incomingPosts);

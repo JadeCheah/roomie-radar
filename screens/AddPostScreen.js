@@ -23,7 +23,7 @@ const AddPostScreen = ({ navigation }) => {
                 postImg: postImg, 
                 liked: false,
                 likes: [],
-                comments: 0,
+                commentsCount: 0,
             });
             setPostText('');
             setPostImg('');  // Reset image URI after posting

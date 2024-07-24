@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, FlatList, TextInput, Button } from 'react-native';
 import { useAuth } from '../navigation/AuthProvider';
-import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from 'firebase/firestore';
+import {
+  collection, addDoc, serverTimestamp, query, orderBy, onSnapshot,
+  runTransaction, doc
+} from 'firebase/firestore';
 import { firestore } from '../firebaseConfig';
 import CommentItem from '../components/CommentItem';
 
@@ -30,12 +33,23 @@ const CommentScreen = ({ route }) => {
 
   const handleSend = async () => {
     if (text) {
-      await addDoc(collection(firestore, `posts/${postId}/comments`), {
-        text: text,
-        createdAt: serverTimestamp(),
-        userId: user.uid,
-        userName: user.displayName || "Anonymous",
+      const postRef = doc(firestore, `posts/${postId}`);
+      const newCommentRef = doc(collection(firestore, `posts/${postId}/comments`));
+
+      await runTransaction(firestore, async (transaction) => {
+        const postSnapshot = await transaction.get(postRef);
+        const currentCount = postSnapshot.data().commentsCount || 0;
+        transaction.set(newCommentRef, {
+          text: text,
+          createdAt: serverTimestamp(),
+          userId: user.uid,
+          userName: user.displayName || "Anonymous",
+        });
+        transaction.update(postRef, {
+          commentsCount: currentCount + 1
+        });
       });
+
       setText('');
     }
   };
@@ -79,5 +93,3 @@ const styles = StyleSheet.create({
     padding: 10,
   },
 });
-
-
