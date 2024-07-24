@@ -84,7 +84,10 @@ const HomeScreen = ({ navigation }) => {
                         />
                         <Button
                             title="Post"
-                            onPress={handleAddPost}
+                            onPress={() => {
+                                setModalVisible(false);
+                                navigation.navigate("AddPost");
+                            }}
                         />
                         <Button
                             title="Cancel"

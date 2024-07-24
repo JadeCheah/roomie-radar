@@ -1,27 +1,21 @@
-
-
-import React, { useEffect, useState, useContext }from 'react';
-import { StyleSheet, Text, View, TouchableOpacity , Alert, Image, ActivityIndicator } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, Alert, Image, ActivityIndicator, ImageBackground, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { uploadToFirebase } from '../firebaseConfig';
-// import { UserProfileContext } from '../navigation/UserProfileContext';
+import GradualButton from '../components/GradualButton'; // Import the GradualButton component
 
-const AddPostUploadPhotoScreen = ({navigation, route}) => {
-    // const { profile, updateUserProfile } = useContext(UserProfileContext);
-
+const AddPostUploadPhotoScreen = ({ navigation, route }) => {
     const [cameraPermission, requestCameraPermission] = ImagePicker.useCameraPermissions();
     const [libraryPermission, requestLibraryPermission] = ImagePicker.useMediaLibraryPermissions();
     const [imageUri, setImageUri] = useState(null);
     const [uploading, setUploading] = useState(false);
 
-    const { onPhotoSelected } = route.params;  // Make sure to destructure route from props
+    const { onPhotoSelected } = route.params;  // Destructure route from props
 
-// Call this function when the photo is confirmed uploaded or selected
-const handlePhotoSelected = (uri) => {
-    console.log("Selected image URI: ", uri);
-    onPhotoSelected(uri);  // This sets the state in AddPostScreen
-    navigation.goBack();   // Optionally navigate back after selection
-};
+    const handlePhotoSelected = (uri) => {
+        onPhotoSelected(uri);  // Set the state in AddPostScreen
+        navigation.goBack();   // Navigate back after selection
+    };
 
     useEffect(() => {
         (async () => {
@@ -34,18 +28,18 @@ const handlePhotoSelected = (uri) => {
         })();
     }, []);
 
-    const takePhotoFromCamera = async() => {
+    const takePhotoFromCamera = async () => {
         try {
             if (cameraPermission?.granted) {
                 const cameraResponse = await ImagePicker.launchCameraAsync({
-                    allowsEditing : true,
-                    mediaTypes : ImagePicker.MediaTypeOptions.All,
-                    qualtiy : 1
+                    allowsEditing: true,
+                    aspect: [16, 9],
+                    mediaTypes: ImagePicker.MediaTypeOptions.All,
+                    quality: 1
                 });
-                if ( !cameraResponse.canceled ) {
+                if (!cameraResponse.canceled) {
                     const { uri } = cameraResponse.assets[0];
-                    setImageUri(uri);
-                    handlePhotoSelected(uri)
+                    navigation.navigate('AddPost', { postImg: uri });
                 }
             } else {
                 Alert.alert('Camera permission not granted');
@@ -54,8 +48,9 @@ const handlePhotoSelected = (uri) => {
             Alert.alert("Error Loading Image " + e.message);
         }
     };
+    
 
-    const pickImageFromLibrary = async() => {
+    const pickImageFromLibrary = async () => {
         try {
             if (libraryPermission?.granted) {
                 const libraryResponse = await ImagePicker.launchImageLibraryAsync({
@@ -63,38 +58,37 @@ const handlePhotoSelected = (uri) => {
                     mediaTypes: ImagePicker.MediaTypeOptions.All,
                     quality: 1
                 });
-                if ( !libraryResponse.canceled ) {
+                if (!libraryResponse.canceled) {
                     const { uri } = libraryResponse.assets[0];
                     setImageUri(uri);
                 }
             } else {
                 Alert.alert('Library permission not granted');
             }
-        } catch(e) {
+        } catch (e) {
             Alert.alert("Error Loading Image " + e.message);
         }
     };
-    
-    const confirmUpload = async() => {
+
+    const confirmUpload = async () => {
         try {
             if (imageUri) {
                 const fileName = imageUri.split('/').pop();
                 setUploading(true);
                 const uploadResponse = await uploadToFirebase(imageUri, fileName);
                 console.log(uploadResponse);
-                //------------
-                // updateUserProfile({ ...profile, profilePhoto: uploadResponse.downloadUrl })
-                //------------
                 Alert.alert("Image uploaded successfully!");
-                setImageUri(null); //clear the image after upload
+                setImageUri(null); // Clear the image after upload
                 navigation.goBack();
             }
-        } catch(e) {
+        } catch (e) {
             Alert.alert("Error Uploading Image " + e.message);
         } finally {
             setUploading(false);
         }
     };
+
+    const dismissKeyboard = () => Keyboard.dismiss();
 
     if (!cameraPermission || !libraryPermission) {
         return (
@@ -106,48 +100,43 @@ const handlePhotoSelected = (uri) => {
 
     if (!cameraPermission.granted || !libraryPermission.granted) {
         return (
-          <View style={styles.container}>
-            <Text>Permissions not granted</Text>
-            <TouchableOpacity onPress={requestCameraPermission}>
-              <Text>Request Camera Permission</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={requestLibraryPermission}>
-              <Text>Request Library Permission</Text>
-            </TouchableOpacity>
-          </View>
+            <View style={styles.container}>
+                <Text>Permissions not granted</Text>
+                <GradualButton title="Request Camera Permission" onPress={requestCameraPermission} />
+                <GradualButton title="Request Library Permission" onPress={requestLibraryPermission} />
+            </View>
         );
-      }
+    }
 
     return (
-        <View style={styles.container}>
-            {imageUri ? (
-                <View style={styles.previewContainer}>
-                    <Image source={{ uri: imageUri }} style={styles.imagePreview} />
-                    {uploading? (
-                        <View style={styles.progressContainer}>
-                            <ActivityIndicator size="large" color="#0000ff" />
+        <ImageBackground
+            source={require('../assets/orange-gradient.jpg')}
+            style={styles.container}
+            resizeMode="cover"
+        >
+            <TouchableWithoutFeedback onPress={dismissKeyboard}>
+                <View style={styles.inner}>
+                    {imageUri ? (
+                        <View style={styles.previewContainer}>
+                            <Image source={{ uri: imageUri }} style={styles.imagePreview} />
+                            {uploading ? (
+                                <View style={styles.progressContainer}>
+                                    <ActivityIndicator size="large" color="#007BFF" />
+                                </View>
+                            ) : (
+                                <GradualButton title="Confirm Upload" onPress={confirmUpload} />
+                            )}
                         </View>
                     ) : (
-                        <TouchableOpacity style={styles.button} onPress={confirmUpload}>
-                            <Text>Confirm Upload</Text>
-                        </TouchableOpacity>
+                        <>
+                            <GradualButton title="Take Photo From Camera" onPress={takePhotoFromCamera} />
+                            <GradualButton title="Choose Photo From Library" onPress={pickImageFromLibrary} />
+                        </>
                     )}
+                    <GradualButton title="Go Back" onPress={() => navigation.goBack()} />
                 </View>
-            ) : (
-                <>
-                    <TouchableOpacity style={styles.button} onPress={takePhotoFromCamera}>
-                        <Text>Take Photo From Camera</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.button} onPress={pickImageFromLibrary}>
-                        <Text>Choose Photo From Library</Text>
-                    </TouchableOpacity>
-                </>
-
-            )}
-            <TouchableOpacity style={styles.button} onPress={() => navigation.goBack()}>
-                <Text>Go Back</Text>
-            </TouchableOpacity>
-        </View>
+            </TouchableWithoutFeedback>
+        </ImageBackground>
     );
 }
 
@@ -155,18 +144,13 @@ export default AddPostUploadPhotoScreen;
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1, 
-        backgroundColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'center',
+        flex: 1,
     },
-    button: {
-        marginBottom: 50,
-        paddingHorizontal: 10, 
-        paddingVertical: 10,
-        alignItems: 'center',
+    inner: {
+        flex: 1,
         justifyContent: 'center',
-        borderWidth: 1,
+        alignItems: 'center',
+        padding: 20,
     },
     previewContainer: {
         alignItems: 'center',
@@ -176,6 +160,7 @@ const styles = StyleSheet.create({
         width: 300,
         height: 300,
         marginBottom: 20,
+        borderRadius: 10, // Add border radius to match the rounded buttons
     },
     progressContainer: {
         width: '80%',
@@ -183,4 +168,3 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
 });
-

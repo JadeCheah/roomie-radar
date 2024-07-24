@@ -12,8 +12,8 @@ const HomeStack = () => {
     return (
         <Stack.Navigator initialRouteName="HomePage">
             <Stack.Screen name="HomePage" component={HomeScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="AddPost" component={AddPostScreen} />
-            <Stack.Screen name="AddPostPhoto" component={AddPostUploadPhotoScreen} />
+            <Stack.Screen name="AddPost" component={AddPostScreen} options={{ headerShown: false }}/>
+            <Stack.Screen name="AddPostPhoto" component={AddPostUploadPhotoScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Comment" component={CommentScreen} />
        </Stack.Navigator>
     )

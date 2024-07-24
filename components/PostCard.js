@@ -5,6 +5,7 @@ import { arrayUnion, arrayRemove, doc, updateDoc } from "firebase/firestore";
 import { firestore } from '../firebaseConfig';
 import { useAuth } from '../navigation/AuthProvider';
 import { useNavigation } from '@react-navigation/native';
+import { formatDistanceToNow, parseISO } from 'date-fns';
 
 const PostCard = ({ item }) => {
     const { user } = useAuth();
@@ -14,6 +15,21 @@ const PostCard = ({ item }) => {
     const likeText = item.likes.length === 1 ? '1 Like' : `${item.likes.length} Likes`;
     const commentText = item.commentsCount === 0 ? "Comment" : item.commentsCount === 1 ? '1 Comment' : `${item.commentsCount} Comments`;
 
+    const getTimeAgo = (timestamp) => {
+        let date;
+        if (timestamp?.toDate) {  // Check if toDate exists indicating it's a Firestore Timestamp
+            date = timestamp.toDate();
+        } else if (typeof timestamp === 'string') {  // Check if it's a string, assume ISO string
+            date = parseISO(timestamp);
+        } else if (timestamp instanceof Date) {  // Check if it's already a Date object
+            date = timestamp;
+        } else {
+            console.error('Invalid timestamp received in getTimeAgo:', timestamp);
+            return 'Invalid date';  // Or handle this case as you see fit
+        }
+    
+        return formatDistanceToNow(date) + ' ago';
+    };
     const handleLike = async () => {
         const postRef = doc(firestore, "posts", item._id);
         if (item.likes.includes(user.uid)) {
