@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, FlatList, TouchableOpacity, Text } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, FlatList, Text, Modal, TextInput, Button, ImageBackground, Pressable } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from 'firebase/firestore';
-import { useAuth } from '../navigation/AuthProvider';
 import { firestore } from '../firebaseConfig';
 import PostCard from '../components/PostCard';
-import { doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
-
+import { useAuth } from '../navigation/AuthProvider';
 
 const HomeScreen = ({ navigation }) => {
     const [posts, setPosts] = useState([]);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [newPostContent, setNewPostContent] = useState('');
     const { user } = useAuth();
 
     useEffect(() => {
@@ -23,7 +23,7 @@ const HomeScreen = ({ navigation }) => {
                 post: doc.data().post || '',
                 postImg: doc.data().postImg,
                 postTime: doc.data().postTime ? new Date(doc.data().postTime.seconds * 1000).toLocaleString() : new Date().toLocaleString(),
-                userImg: doc.data().userImg || 'default_avatar.png',  // Assuming a string URL
+                userImg: doc.data().userImg || 'default_avatar.png',
                 userName: doc.data().userName || '',
                 likes: doc.data().likes || 0,
                 commentsCount: doc.data().commentsCount,
@@ -32,28 +32,76 @@ const HomeScreen = ({ navigation }) => {
             setPosts(incomingPosts);
         });
 
-        return () => {
-            console.log("[HomeScreen] Cleaning up posts listener.");
-            unsubscribe();
-        };
+        return () => unsubscribe();
     }, []);
 
+    const handleAddPost = async () => {
+        if (newPostContent.trim()) {
+            await addDoc(collection(firestore, "posts"), {
+                post: newPostContent,
+                postTime: serverTimestamp(),
+                userImg: user.photoURL, // Assuming you store the user's photo URL in the auth context
+                userName: user.displayName,
+                likes: 0,
+                commentsCount: 0,
+                liked: false
+            });
+            setNewPostContent('');
+            setModalVisible(false);
+        }
+    };
+
     return (
-        <View style={styles.container}>
-            <TouchableOpacity onPress={() => navigation.navigate('AddPost')} style={styles.addButton}>
+        <ImageBackground 
+            source={require('../assets/orange-gradient.jpg')} 
+            style={styles.container}
+            resizeMode="cover"
+        >
+            <Pressable 
+                onPress={() => setModalVisible(true)}
+                style={({ pressed }) => [
+                    styles.addButton,
+                    { backgroundColor: pressed ? '#FEB47B' : '#FF7E5F' }
+                ]}
+            >
                 <Text style={styles.addButtonText}>+</Text>
-            </TouchableOpacity>
+            </Pressable>
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                    setModalVisible(!modalVisible);
+                }}
+            >
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                        <TextInput
+                            placeholder="What's on your mind?"
+                            value={newPostContent}
+                            onChangeText={setNewPostContent}
+                            style={styles.modalText}
+                        />
+                        <Button
+                            title="Post"
+                            onPress={handleAddPost}
+                        />
+                        <Button
+                            title="Cancel"
+                            color="red"
+                            onPress={() => setModalVisible(false)}
+                        />
+                    </View>
+                </View>
+            </Modal>
             <FlatList
                 data={posts}
                 keyExtractor={item => item._id}
-                renderItem={({ item }) => {
-                console.log(item);
-                return <PostCard item={item} />}}
+                renderItem={({ item }) => <PostCard item={item} />}
                 ItemSeparatorComponent={() => <View style={styles.separator} />}
                 showsVerticalScrollIndicator={false}
             />
-          
-        </View>
+        </ImageBackground>
     );
 };
 
@@ -62,22 +110,43 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 10
     },
-    separator: {
-        height: 1,
-        width: "100%",
-        backgroundColor: "#ddd",
-        marginLeft: 60
-    },
     addButton: {
-      padding: 10,
-      position: 'absolute',
-      right: 10,
-      top: 10,
-      zIndex: 1
+        padding: 10,
+        position: 'absolute',
+        right: 10,
+        top: 10,
+        zIndex: 1,
+        borderRadius: 20,
+        elevation: 3
     },
     addButtonText: {
-      fontSize: 24,
-      color: '#2e64e5'
+        fontSize: 24,
+        color: '#ffffff'
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 22
+    },
+    modalView: {
+        margin: 20,
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 35,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5
+    },
+    modalText: {
+        marginBottom: 15,
+        textAlign: 'center'
     }
 });
 

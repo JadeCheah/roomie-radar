@@ -1,6 +1,5 @@
 import React from 'react';
-import { Card, UserInfo, UserImg, UserName, UserInfoText, PostTime, PostText, InteractionWrapper, Interaction, InteractionText } from "../styles/FeedStyles";
-import { Image, View, TouchableOpacity } from 'react-native';
+import { Image, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { arrayUnion, arrayRemove, doc, updateDoc } from "firebase/firestore";
 import { firestore } from '../firebaseConfig';
@@ -25,34 +24,87 @@ const PostCard = ({ item }) => {
     };
 
     return (
-        <Card>
-            <UserInfo>
-                <UserImg source={{ uri: item.userImg }} />
-                <UserInfoText>
-                    <UserName>{item.userName}</UserName>
-                    <PostTime>{item.postTime}</PostTime>
-                </UserInfoText>
-            </UserInfo>
+        <View style={styles.card}>
+            <View style={styles.userInfo}>
+                <Image source={{ uri: item.userImg }} style={styles.userImg} />
+                <View style={styles.userInfoText}>
+                    <Text style={styles.userName}>{item.userName}</Text>
+                    <Text style={styles.postTime}>{item.postTime}</Text>
+                </View>
+            </View>
             {item.postImg && (
                 <Image
                     source={{ uri: item.postImg }}
-                    style={{ width: '100%', height: 200, backgroundColor: 'transparent' }}
+                    style={styles.postImg}
                     resizeMode="cover"
                 />
             )}
-            <PostText>{item.post}</PostText>
-            <InteractionWrapper>
-                <Interaction active={item.liked} onPress={handleLike}>
+            <Text style={styles.postText}>{item.post}</Text>
+            <View style={styles.interactionWrapper}>
+                <TouchableOpacity style={styles.interaction} onPress={handleLike}>
                     <Ionicons name={likeIcon} size={25} color={likeIconColor} />
-                    <InteractionText active={item.liked}>{likeText}</InteractionText>
-                </Interaction>
-                <Interaction onPress={() => navigation.navigate('Comment', { postId: item._id })}>
+                    <Text style={styles.interactionText}>{likeText}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.interaction} onPress={() => navigation.navigate('Comment', { postId: item._id })}>
                     <Ionicons name='chatbubble-outline' size={25} color='#333' />
-                    <InteractionText>{commentText}</InteractionText>
-                </Interaction>
-            </InteractionWrapper>
-        </Card>
+                    <Text style={styles.interactionText}>{commentText}</Text>
+                </TouchableOpacity>
+            </View>
+        </View>
     );
 };
+
+const styles = StyleSheet.create({
+    card: {
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        padding: 10,
+        marginBottom: 10,
+    },
+    userInfo: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    userImg: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        marginRight: 10,
+    },
+    userInfoText: {
+        flex: 1,
+        justifyContent: 'center',
+    },
+    userName: {
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
+    postTime: {
+        fontSize: 12,
+        color: '#666',
+    },
+    postImg: {
+        width: '100%',
+        height: 200,
+        borderRadius: 10,
+        marginTop: 10,
+        marginBottom: 10,
+    },
+    postText: {
+        marginBottom: 10,
+    },
+    interactionWrapper: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+    },
+    interaction: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    interactionText: {
+        marginLeft: 5,
+        fontWeight: 'bold',
+    },
+});
 
 export default PostCard;
