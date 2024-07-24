@@ -5,10 +5,12 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { arrayUnion, arrayRemove, doc, updateDoc } from "firebase/firestore";
 import { firestore } from '../firebaseConfig';
 import { useAuth } from '../navigation/AuthProvider';
-
+import { useNavigation } from '@react-navigation/native'; // Import useNavigation hook
+import { createPortal } from 'react-dom';
 
 const PostCard = ({ item }) => {
     const { user } = useAuth();
+    const navigation = useNavigation(); // Use the useNavigation hook to get access to navigation
     const likeIcon = item.liked ? 'heart' : 'heart-outline';
     const likeIconColor = item.liked ? '#2e64e5' : '#333';
     const likeText = item.likes.length === 1 ? '1 Like' : item.likes.length > 1 ? `${item.likes.length} Likes` : 'Like';
@@ -18,18 +20,15 @@ const PostCard = ({ item }) => {
         const postRef = doc(firestore, "posts", item._id);
     
         if (item.likes.includes(user.uid)) {
-            // If the current user's ID is already in the likes array, remove it
             await updateDoc(postRef, {
                 likes: arrayRemove(user.uid)
             });
         } else {
-            // If the current user's ID is not in the likes array, add it
             await updateDoc(postRef, {
                 likes: arrayUnion(user.uid)
             });
         }
     };
-        
 
     return (
         <Card>
@@ -53,8 +52,11 @@ const PostCard = ({ item }) => {
                     <Ionicons name={likeIcon} size={25} color={likeIconColor} />
                     <InteractionText active={item.liked}>{likeText}</InteractionText>
                 </Interaction>
-                <Interaction>
-                    <Ionicons name='chatbubble-outline' size={25} />
+                <Interaction 
+                onPress={() => {
+                    console.log("Navigating to comments for post ID:", item._id);
+                    navigation.navigate('Comment', { postId: item._id }) }}>
+                    <Ionicons name='chatbubble-outline' size={25} color={likeIconColor} />
                     <InteractionText>{commentText}</InteractionText>
                 </Interaction>
             </InteractionWrapper>
@@ -63,4 +65,3 @@ const PostCard = ({ item }) => {
 };
 
 export default PostCard;
-
