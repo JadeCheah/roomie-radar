@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { FlatList, Text, TouchableOpacity, View, StyleSheet, Alert, Image } from 'react-native';
+import { FlatList, Text, TouchableOpacity, View, StyleSheet, Alert, Image, ImageBackground } from 'react-native';
 import { firestore } from '../firebaseConfig';
 import { query, collection, where, onSnapshot, orderBy, getDocs, doc, getDoc } from 'firebase/firestore';
 import { useAuth } from '../navigation/AuthProvider';
+import { formatDistanceToNow } from 'date-fns';
 
 const MessageScreen = ({ navigation }) => {
   const [chats, setChats] = useState([]);
   const { user } = useAuth();
-  const [userPhotos, setUserPhotos] = useState({}); // State to store user photos
+  const [userPhotos, setUserPhotos] = useState({});
 
   useEffect(() => {
     if (!user) return;
@@ -18,7 +19,7 @@ const MessageScreen = ({ navigation }) => {
         const fetchedChats = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
-          lastMessageTime: doc.data().lastMessageTime ? doc.data().lastMessageTime.toDate() : new Date()
+          lastMessageTime: doc.data().lastMessageTime ? formatDistanceToNow(doc.data().lastMessageTime.toDate()) + ' ago' : 'No date'
         }));
         setChats(fetchedChats);
         fetchUserPhotos(new Set(fetchedChats.flatMap(chat => chat.participantIds.filter(id => id !== user.uid))));
@@ -71,7 +72,11 @@ const MessageScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <ImageBackground 
+      source={require('../assets/orange-gradient.jpg')}
+      style={styles.container}
+      resizeMode="cover"
+    >
       <TouchableOpacity onPress={promptForEmail} style={styles.addButton}>
         <Text style={styles.addButtonText}>+</Text>
       </TouchableOpacity>
@@ -94,14 +99,14 @@ const MessageScreen = ({ navigation }) => {
               <Image source={{ uri: otherParticipantPhoto }} style={styles.profilePic} />
               <View style={styles.messageContainer}>
                 <Text style={styles.userName}>{otherParticipantName}</Text>
-                <Text style={styles.lastMessage}>{item.lastMessage}</Text>
+                <Text style={styles.lastMessage}>{item.lastMessage} - {item.lastMessageTime}</Text>
               </View>
             </TouchableOpacity>
           );
         }}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
       />
-    </View>
+    </ImageBackground>
   );
 };
 
@@ -115,16 +120,21 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 10,
     top: 10,
-    zIndex: 1
+    zIndex: 1,
+    borderRadius: 20,
+    backgroundColor: '#FF7E5F', // Matching the aesthetic of the '+' button on HomeScreen
   },
   addButtonText: {
     fontSize: 24,
-    color: '#2e64e5'
+    color: '#ffffff'
   },
   chatItem: {
     flexDirection: 'row',
     padding: 10,
-    alignItems: 'center'
+    backgroundColor: '#fff', // Light grey background for each chat item
+    alignItems: 'center',
+    borderRadius: 10, // Rounded corners for chat items
+    marginBottom: 10, // Space between chat items
   },
   profilePic: {
     width: 50,
@@ -146,9 +156,8 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 1,
-    width: "100%",
-    backgroundColor: "#ddd",
-    marginLeft: 60
+    backgroundColor: '#ddd', // Separator color
+    marginLeft: 60 // Indentation for the separator
   }
 });
 
