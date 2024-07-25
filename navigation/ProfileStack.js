@@ -46,19 +46,6 @@ const ProfileStack = ({ navigation }) => {
                     ),
                 })}
             />
-            <Stack.Screen
-                name="Find Matches"
-                component={FindMatchesScreen}
-                options={({ navigation }) => ({
-                    headerLeft: () => (
-                        <Button
-                            onPress={() => navigation.goBack()}
-                            title="< Back"
-                            color="#000"
-                        />
-                    ),
-                })}
-            />
         </Stack.Navigator>
         </UserProfileProvider >
     );

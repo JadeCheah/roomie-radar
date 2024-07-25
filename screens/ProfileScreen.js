@@ -5,6 +5,16 @@ import { AuthContext } from "../navigation/AuthProvider";
 import FormButton from '../components/FormButton';
 import { ActivityIndicator } from 'react-native-paper';
 
+import migrateUserData from '../misc/migrationScript';
+const handleMigration = async() => {
+    try {
+        await migrateUserData();
+        console.log('Migration completed successfully!');
+    } catch (error) {
+        console.error('Migration failed: ', error);
+    }
+};
+
 const ProfileScreen = ({ navigation }) => {
     const { profile, loading } = useContext(UserProfileContext);
 
@@ -30,9 +40,9 @@ const ProfileScreen = ({ navigation }) => {
                 <TouchableOpacity style={styles.userBtn} onPress={() => navigation.navigate('Edit Profile')}>
                     <Text style={styles.userBtnText}>Edit Profile</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.userBtn} onPress={() => navigation.navigate('Find Matches')}>
-                    <Text style={styles.userBtnText}>Find Matches</Text>
-                </TouchableOpacity>
+                {/* <TouchableOpacity style={styles.userBtn} onPress={handleMigration}>
+                    <Text style={styles.userBtnText}>Migrate User Data</Text>
+                </TouchableOpacity> */}
             </View>
 
             {/* <View style={styles.userInfoContainer}>
