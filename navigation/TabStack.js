@@ -5,7 +5,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import HomeStack from './HomeStack';
 import ChatStack from './ChatStack';
 import FindMatchesScreen from '../screens/FindMatchesScreen';
-import HomeDrawerNav from './HomeDrawerNav';
+import HomeDrawerNav from './HomeStack';
 import ProfileDrawer from './ProfileDrawerNav';
 
 const Tab = createBottomTabNavigator();
@@ -15,7 +15,7 @@ const MyTabs = () => {
         <Tab.Navigator initialRouteName='Home'>
             <Tab.Screen 
               name="Home" 
-              component={HomeDrawerNav}
+              component={HomeStack}
               options={{
                 tabBarIcon: ({ color, size }) => (
                     <MaterialCommunityIcons name="home" color={color} size={size} />

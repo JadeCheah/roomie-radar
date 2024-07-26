@@ -60,7 +60,7 @@ const HomeScreen = ({ navigation }) => {
             <FlatList
                 data={posts}
                 keyExtractor={item => item._id}
-                renderItem={({ item }) => <PostCard item={item} />}
+                renderItem={({ item }) => <PostCard item={item}/>}
                 ItemSeparatorComponent={() => <View style={styles.separator} />}
                 showsVerticalScrollIndicator={false}
             />
