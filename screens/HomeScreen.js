@@ -57,46 +57,6 @@ const HomeScreen = ({ navigation }) => {
             style={styles.container}
             resizeMode="cover"
         >
-            <Pressable 
-                onPress={() => setModalVisible(true)}
-                style={({ pressed }) => [
-                    styles.addButton,
-                    { backgroundColor: pressed ? '#FEB47B' : '#FF7E5F' }
-                ]}
-            >
-                <Text style={styles.addButtonText}>+</Text>
-            </Pressable>
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={() => {
-                    setModalVisible(!modalVisible);
-                }}
-            >
-                <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <TextInput
-                            placeholder="What's on your mind?"
-                            value={newPostContent}
-                            onChangeText={setNewPostContent}
-                            style={styles.modalText}
-                        />
-                        <Button
-                            title="Post"
-                            onPress={() => {
-                                setModalVisible(false);
-                                navigation.navigate("AddPost");
-                            }}
-                        />
-                        <Button
-                            title="Cancel"
-                            color="red"
-                            onPress={() => setModalVisible(false)}
-                        />
-                    </View>
-                </View>
-            </Modal>
             <FlatList
                 data={posts}
                 keyExtractor={item => item._id}
