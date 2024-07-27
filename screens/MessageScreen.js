@@ -1,5 +1,4 @@
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { FlatList, Text, TouchableOpacity, View, StyleSheet, Alert, Image, ImageBackground } from 'react-native';
 import { firestore } from '../firebaseConfig';
 import { query, collection, where, onSnapshot, orderBy, getDocs, doc, getDoc } from 'firebase/firestore';
@@ -9,41 +8,48 @@ import { formatDistanceToNow } from 'date-fns';
 const MessageScreen = ({ navigation }) => {
   const [chats, setChats] = useState([]);
   const { user } = useAuth();
-  const [userPhotos, setUserPhotos] = useState({});
+  const [userInfo, setUserInfo] = useState({});
+
+  const fetchUserInfo = useCallback(async (userId) => {
+    if (userInfo[userId]) return userInfo[userId];
+
+    const userRef = doc(firestore, 'users', userId);
+    const userSnap = await getDoc(userRef);
+    if (userSnap.exists()) {
+      const userData = userSnap.data();
+      const newUserInfo = {
+        userName: userData.userName || 'Unknown',
+        profilePhoto: userData.profilePhoto || require('../assets/default-photo.jpeg')
+      };
+      setUserInfo(prev => ({ ...prev, [userId]: newUserInfo }));
+      return newUserInfo;
+    }
+    return { userName: 'Unknown', profilePhoto: require('../assets/default-photo.jpeg') };
+  }, [userInfo]);
 
   useEffect(() => {
     if (!user) return;
 
     const unsubscribe = onSnapshot(
       query(collection(firestore, 'conversations'), where("participantIds", "array-contains", user.uid), orderBy("lastMessageTime", "desc")),
-      (snapshot) => {
-        const fetchedChats = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          lastMessageTime: doc.data().lastMessageTime ? formatDistanceToNow(doc.data().lastMessageTime.toDate()) + ' ago' : 'No date'
+      async (snapshot) => {
+        const fetchedChats = await Promise.all(snapshot.docs.map(async doc => {
+          const data = doc.data();
+          const otherParticipantId = data.participantIds.find(id => id !== user.uid);
+          const otherParticipantInfo = await fetchUserInfo(otherParticipantId);
+          return {
+            id: doc.id,
+            ...data,
+            otherParticipantInfo,
+            lastMessageTime: data.lastMessageTime ? formatDistanceToNow(data.lastMessageTime.toDate()) + ' ago' : 'No date'
+          };
         }));
         setChats(fetchedChats);
-        fetchUserPhotos(new Set(fetchedChats.flatMap(chat => chat.participantIds.filter(id => id !== user.uid))));
       }
     );
 
     return () => unsubscribe();
-  }, [user]);
-
-  const fetchUserPhotos = async (userIds) => {
-    const photos = {};
-    await Promise.all(Array.from(userIds).map(async userId => {
-      const photoUrl = await fetchPhotoById(userId);
-      photos[userId] = photoUrl;
-    }));
-    setUserPhotos(photos);
-  };
-
-  const fetchPhotoById = async (userId) => {
-    const userRef = doc(firestore, 'users', userId);
-    const userSnap = await getDoc(userRef);
-    return userSnap.exists() ? userSnap.data().profilePhoto || '' : '';
-  };
+  }, [user, fetchUserInfo]);
 
   const promptForEmail = () => {
     Alert.prompt(
@@ -72,6 +78,28 @@ const MessageScreen = ({ navigation }) => {
     }
   };
 
+  const renderChatItem = ({ item }) => (
+    <TouchableOpacity
+      onPress={() => navigation.navigate('ChatScreen', {
+        conversationId: item.id,
+        recipientId: item.participantIds.find(id => id !== user.uid),
+        recipientName: item.otherParticipantInfo.userName
+      })}
+      style={styles.chatItem}
+    >
+      <Image 
+        source={typeof item.otherParticipantInfo.profilePhoto === 'string' 
+          ? { uri: item.otherParticipantInfo.profilePhoto } 
+          : item.otherParticipantInfo.profilePhoto} 
+        style={styles.profilePic} 
+      />
+      <View style={styles.messageContainer}>
+        <Text style={styles.userName}>{item.otherParticipantInfo.userName}</Text>
+        <Text style={styles.lastMessage}>{item.lastMessage} - {item.lastMessageTime}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+
   return (
     <ImageBackground 
       source={require('../assets/orange-gradient.jpg')}
@@ -84,32 +112,15 @@ const MessageScreen = ({ navigation }) => {
       <FlatList
         data={chats}
         keyExtractor={item => item.id}
-        renderItem={({ item }) => {
-          const otherParticipantId = item.participantIds.find(id => id !== user.uid);
-          const otherParticipantName = item.participantNames[item.participantIds.indexOf(otherParticipantId)];
-          const otherParticipantPhoto = userPhotos[otherParticipantId] || '../assets/default-photo.jpeg';
-          return (
-            <TouchableOpacity
-              onPress={() => navigation.navigate('ChatScreen', {
-                conversationId: item.id,
-                recipientId: otherParticipantId,
-                recipientName: otherParticipantName
-              })}
-              style={styles.chatItem}
-            >
-              <Image source={{ uri: otherParticipantPhoto }} style={styles.profilePic} />
-              <View style={styles.messageContainer}>
-                <Text style={styles.userName}>{otherParticipantName}</Text>
-                <Text style={styles.lastMessage}>{item.lastMessage} - {item.lastMessageTime}</Text>
-              </View>
-            </TouchableOpacity>
-          );
-        }}
+        renderItem={renderChatItem}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
       />
     </ImageBackground>
   );
 };
+
+
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -162,3 +173,4 @@ const styles = StyleSheet.create({
 });
 
 export default MessageScreen;
+

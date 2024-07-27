@@ -10,8 +10,8 @@ const ProfileScreen = ({ navigation }) => {
             <View style={styles.loaderContainer}>
                 <ActivityIndicator size="large" color="#0000ff" />
             </View>
-        );
-    }
+        );}
+        console.log(profile)
 
     return (
         <View style={styles.container}>
@@ -24,7 +24,7 @@ const ProfileScreen = ({ navigation }) => {
                     <View style={styles.profileCard}>
                         <Image source={{ uri: profile.profilePhoto }} style={styles.userImg} />
                         <Text style={styles.userName}>{profile.userName}</Text>
-                        <Text style={styles.userTitle}>{profile.userIntro || ""}</Text>
+                        <Text style={styles.userTitle}>{profile.userIntro || "No title"}</Text>
                         <TouchableOpacity style={styles.userBtn} onPress={() => navigation.navigate('Edit Profile')}>
                             <Text style={styles.userBtnText}>Edit Profile</Text>
                         </TouchableOpacity>

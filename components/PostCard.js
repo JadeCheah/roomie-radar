@@ -8,7 +8,6 @@ import { useNavigation } from '@react-navigation/native';
 import { formatDistanceToNow } from 'date-fns';
 
 const PostCard = ({ item }) => {
-    console.log(item);
     const { user } = useAuth();
     const navigation = useNavigation();
     const likeIcon = item.likes.length > 0 ? 'heart' : 'heart-outline';

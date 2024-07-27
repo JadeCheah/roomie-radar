@@ -79,7 +79,7 @@ const ChatScreen = ({ route }) => {
           console.log("[ChatScreen] No existing conversation found. Creating new one.");
           const newConversationRef = await addDoc(conversationsRef, {
             participantIds,
-            participantNames: [user.displayName, recipientName],
+            participantNames: [user.displayName, recipientName],//not necessarily order corresponds ot ids as not sorted
             lastMessage: message.text,
             lastMessageTime: serverTimestamp()
           });

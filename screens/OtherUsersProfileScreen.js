@@ -1,10 +1,8 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, ActivityIndicator, ImageBackground, TouchableOpacity } from 'react-native';
-import { firestore } from '../firebaseConfig'; // Adjust based on your project structure
-import { doc, getDoc, query, collection, where, getDocs} from 'firebase/firestore';
-import { useNavigation } from '@react-navigation/native';
+import { View, Text, Image, StyleSheet, ScrollView, ActivityIndicator, ImageBackground, TouchableOpacity, Alert } from 'react-native';
+import { firestore } from '../firebaseConfig';
+import { doc, getDoc, query, collection, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../navigation/AuthProvider';
-
 
 const OtherUsersProfileScreen = ({ route }) => {
     const { userId } = route.params;
@@ -13,40 +11,6 @@ const OtherUsersProfileScreen = ({ route }) => {
     const navigation = useNavigation();
     const { user } = useAuth();
 
-
-    const initiateConversation = async (email) => {
-        const q = query(collection(firestore, 'users'), where('email', '==', email));
-        const querySnapshot = await getDocs(q);
-        if (!querySnapshot.empty) {
-          const userData = querySnapshot.docs[0].data();
-          const userId = querySnapshot.docs[0].id;
-          navigation.navigate('ChatScreen', {
-            recipientId: userId,
-            recipientName: userData?.userName || "Unknown",
-          });
-        } else {
-          Alert.alert("Invalid email", "No user found with this email address.");
-        }
-      };
-
-const findOrCreateConversation = async (user1Id, user2Id) => {
-  const sortedIds = [user1Id, user2Id].sort();
-  const conversationsRef = collection(firestore, 'conversations');
-  const q = query(conversationsRef, where("participantIds", '==', sortedIds));
-
-  const querySnapshot = await getDocs(q);
-  if (!querySnapshot.empty) {
-    // Conversation exists
-    const conversation = querySnapshot.docs[0];
-    return conversation.id;
-  } else {
-    // No existing conversation, create a new one
-    return await initiateConversation(sortedIds);
-  }
-};
-
-    
-
     useEffect(() => {
         const getUserProfile = async () => {
             setLoading(true);
@@ -54,7 +18,7 @@ const findOrCreateConversation = async (user1Id, user2Id) => {
             const docSnap = await getDoc(userRef);
 
             if (docSnap.exists()) {
-                setUserProfile(docSnap.data());
+                setUserProfile({ ...docSnap.data(), userId: docSnap.id });
             } else {
                 console.log("No such document!");
             }
@@ -64,10 +28,50 @@ const findOrCreateConversation = async (user1Id, user2Id) => {
         getUserProfile();
     }, [userId]);
 
+    const findOrCreateConversation = async (user1Id, user2Id) => {
+        if (user1Id === user2Id) {
+            Alert.alert("Error", "You can't start a conversation with yourself.");
+            return;
+        }
+
+        const sortedIds = [user1Id, user2Id].sort();
+        const conversationsRef = collection(firestore, 'conversations');
+        const q = query(conversationsRef, where("participantIds", '==', sortedIds));
+
+        try {
+            const querySnapshot = await getDocs(q);
+            let conversationId;
+            let recipientName = userProfile.userName;
+
+            if (!querySnapshot.empty) {
+                // Conversation exists
+                conversationId = querySnapshot.docs[0].id;
+            } else {
+                // No existing conversation, create a new one
+                const newConversationRef = await addDoc(conversationsRef, {
+                    participantIds: sortedIds,
+                    participantNames: [user.displayName, recipientName],
+                    lastMessage: "",
+                    lastMessageTime: serverTimestamp()
+                });
+                conversationId = newConversationRef.id;
+            }
+
+            navigation.navigate('ChatScreen', {
+                conversationId,
+                recipientId: user2Id,
+                recipientName
+            });
+        } catch (error) {
+            console.error("Error finding or creating conversation:", error);
+            Alert.alert("Error", "Failed to start conversation. Please try again.");
+        }
+    };
+
     if (loading) {
         return <ActivityIndicator size="large" color="#0000ff" />;
     }
-    console.log(userProfile);
+
     return (
         <View style={styles.container}>
             <ImageBackground 
@@ -80,18 +84,24 @@ const findOrCreateConversation = async (user1Id, user2Id) => {
                         <Image source={{ uri: userProfile.profilePhoto }} style={styles.userImg} />
                         <Text style={styles.userName}>{userProfile.userName}</Text>
                         <Text style={styles.userTitle}>{userProfile.userIntro || ""}</Text>
-                        <TouchableOpacity style={styles.userBtn} onPress={() => navigation.navigate('Edit Profile')}>
-                            <Text style={styles.userBtnText}>Edit Profile</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.userBtn} onPress={() => findOrCreateConversation(userProfile.userId, user.userId)}>
-                            <Text style={styles.userBtnText}>Send message</Text>
-                        </TouchableOpacity>
+                        {user.uid !== userId && (
+                            <TouchableOpacity 
+                                style={styles.userBtn} 
+                                onPress={() => findOrCreateConversation(user.uid, userId)}
+                            >
+                                <Text style={styles.userBtnText}>Send message</Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
                 </ScrollView>
             </ImageBackground>
         </View>
     );
 };
+
+// ... (styles remain the same)
+
+export default OtherUsersProfileScreen;
 
 const styles = StyleSheet.create({
     container: {
@@ -156,7 +166,6 @@ const styles = StyleSheet.create({
     },
 });
 
-export default OtherUsersProfileScreen;
 
 
 //     return (
