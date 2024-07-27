@@ -25,6 +25,7 @@ const HomeScreen = ({ navigation }) => {
                 postTime: doc.data().postTime ? new Date(doc.data().postTime.seconds * 1000).toLocaleString() : new Date().toLocaleString(),
                 userImg: doc.data().userImg || 'default_avatar.png',
                 userName: doc.data().userName || '',
+                userId: doc.data().userId,
                 likes: doc.data().likes || 0,
                 commentsCount: doc.data().commentsCount,
                 liked: doc.data().liked || false,

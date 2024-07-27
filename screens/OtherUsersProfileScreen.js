@@ -1,12 +1,51 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, Image, StyleSheet, ScrollView, ActivityIndicator, ImageBackground, TouchableOpacity } from 'react-native';
 import { firestore } from '../firebaseConfig'; // Adjust based on your project structure
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, query, collection, where, getDocs} from 'firebase/firestore';
+import { useNavigation } from '@react-navigation/native';
+import { useAuth } from '../navigation/AuthProvider';
+
 
 const OtherUsersProfileScreen = ({ route }) => {
     const { userId } = route.params;
     const [userProfile, setUserProfile] = useState(null);
     const [loading, setLoading] = useState(true);
+    const navigation = useNavigation();
+    const { user } = useAuth();
+
+
+    const initiateConversation = async (email) => {
+        const q = query(collection(firestore, 'users'), where('email', '==', email));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+          const userData = querySnapshot.docs[0].data();
+          const userId = querySnapshot.docs[0].id;
+          navigation.navigate('ChatScreen', {
+            recipientId: userId,
+            recipientName: userData?.userName || "Unknown",
+          });
+        } else {
+          Alert.alert("Invalid email", "No user found with this email address.");
+        }
+      };
+
+const findOrCreateConversation = async (user1Id, user2Id) => {
+  const sortedIds = [user1Id, user2Id].sort();
+  const conversationsRef = collection(firestore, 'conversations');
+  const q = query(conversationsRef, where("participantIds", '==', sortedIds));
+
+  const querySnapshot = await getDocs(q);
+  if (!querySnapshot.empty) {
+    // Conversation exists
+    const conversation = querySnapshot.docs[0];
+    return conversation.id;
+  } else {
+    // No existing conversation, create a new one
+    return await initiateConversation(sortedIds);
+  }
+};
+
+    
 
     useEffect(() => {
         const getUserProfile = async () => {
@@ -28,6 +67,7 @@ const OtherUsersProfileScreen = ({ route }) => {
     if (loading) {
         return <ActivityIndicator size="large" color="#0000ff" />;
     }
+    console.log(userProfile);
     return (
         <View style={styles.container}>
             <ImageBackground 
@@ -37,11 +77,14 @@ const OtherUsersProfileScreen = ({ route }) => {
             >
                 <ScrollView contentContainerStyle={styles.contentContainer}>
                     <View style={styles.profileCard}>
-                        <Image source={{ uri: profile.profilePhoto }} style={styles.userImg} />
-                        <Text style={styles.userName}>{profile.userName}</Text>
-                        <Text style={styles.userTitle}>{profile.userIntro || ""}</Text>
+                        <Image source={{ uri: userProfile.profilePhoto }} style={styles.userImg} />
+                        <Text style={styles.userName}>{userProfile.userName}</Text>
+                        <Text style={styles.userTitle}>{userProfile.userIntro || ""}</Text>
                         <TouchableOpacity style={styles.userBtn} onPress={() => navigation.navigate('Edit Profile')}>
                             <Text style={styles.userBtnText}>Edit Profile</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.userBtn} onPress={() => findOrCreateConversation(userProfile.userId, user.userId)}>
+                            <Text style={styles.userBtnText}>Send message</Text>
                         </TouchableOpacity>
                     </View>
                 </ScrollView>

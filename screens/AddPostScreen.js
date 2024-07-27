@@ -20,6 +20,7 @@ const AddPostScreen = ({ navigation, route }) => {
         if (postText.trim().length > 0) {
             await addDoc(collection(firestore, 'posts'), {
                 userName: user.displayName,
+                userId: user.uid,
                 userImg: user.photoURL,
                 postTime: serverTimestamp(),
                 post: postText.trim(),

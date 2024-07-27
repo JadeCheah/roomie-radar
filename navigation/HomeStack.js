@@ -4,8 +4,9 @@ import HomeScreen from '../screens/HomeScreen';
 import AddPostScreen from '../screens/AddPostScreen';
 import AddPostUploadPhotoScreen from '../screens/AddPostUploadPhotoScreen';
 import CommentScreen from '../screens/CommentScreen';
-import { Modal, View, TextInput, Button, StyleSheet, Pressable, Text } from 'react-native';
+import { StyleSheet, Pressable, Text } from 'react-native';
 import OtherUsersProfileScreen from '../screens/OtherUsersProfileScreen';
+import ChatScreen from '../screens/ChatScreen';
 
 const Stack = createStackNavigator();
 
@@ -47,12 +48,13 @@ const HomeStack = () => {
                                 <Text style={styles.addButtonText}>+</Text>
                             </Pressable>
                         ),
-                        headerTitle: "SHARE YOUR EXPERIENCES HERE"
+                        headerTitle: "Home"
                     })}
                 />
                 <Stack.Screen name="AddPost" component={AddPostScreen} />
                 <Stack.Screen name="HomePage" component={HomeScreen} options={{ headerShown: false }} />
                 <Stack.Screen name="OtherUsersProfileScreen" component={OtherUsersProfileScreen} options={{ headerShown: false }} />
+                <Stack.Screen name="ChatScreen" component={ChatScreen} />
             <Stack.Screen name="AddPostPhoto" component={AddPostUploadPhotoScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Comment" component={CommentScreen} />
             </Stack.Navigator>

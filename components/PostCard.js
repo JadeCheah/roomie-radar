@@ -5,9 +5,10 @@ import { arrayUnion, arrayRemove, doc, updateDoc } from "firebase/firestore";
 import { firestore } from '../firebaseConfig';
 import { useAuth } from '../navigation/AuthProvider';
 import { useNavigation } from '@react-navigation/native';
-import { formatDistanceToNow, parseISO } from 'date-fns';
+import { formatDistanceToNow } from 'date-fns';
 
 const PostCard = ({ item }) => {
+    console.log(item);
     const { user } = useAuth();
     const navigation = useNavigation();
     const likeIcon = item.likes.length > 0 ? 'heart' : 'heart-outline';
@@ -15,29 +16,6 @@ const PostCard = ({ item }) => {
     const likeText = item.likes.length === 1 ? '1 Like' : `${item.likes.length} Likes`;
     const commentText = item.commentsCount === 0 ? "Comment" : item.commentsCount === 1 ? '1 Comment' : `${item.commentsCount} Comments`;
 
-    const getTimeAgo = (timestamp) => {
-        let date;
-        console.log(typeof timestamp);
-
-        console.log(timestamp);
-        try {
-            // if (timestamp.toDate) {
-            //     date = timestamp.toDate();
-            // } else if (typeof timestamp === string) {
-            //     date = new Date(timestamp);
-            // } else if (timestamp instanceof Date) {
-            //     // It's already a Date object
-            //     date = timestamp;
-            // } else {
-            //     throw new Error('Invalid timestamp format');
-            // }
-    
-            return convertDateString(timestamp) + '';
-        } catch (error) {
-            console.error('Error converting timestamp:', error);
-            return 'Invalid date';
-        }
-    };
 
     const convertDateString = (dateStr) => {
         const parts = dateStr.split(", ");
@@ -52,7 +30,8 @@ const PostCard = ({ item }) => {
     
 
     const openUserProfile = () => {
-        navigation.navigate('OtherUsersProfileScreen', { userId: item.userId }); // Make sure userId is properly passed here
+        console.log(item.userId);
+        navigation.navigate('OtherUsersProfileScreen', { userId: item.userId }); 
     };
 
     const handleLike = async () => {
@@ -70,7 +49,7 @@ const PostCard = ({ item }) => {
                 <Image source={{ uri: item.userImg }} style={styles.userImg} />
                 <View style={styles.userInfoText}>
                     <Text style={styles.userName}>{item.userName}</Text>
-                    <Text style={styles.postTime}>{getTimeAgo(item.postTime)}</Text>
+                    <Text style={styles.postTime}>{convertDateString(item.postTime)}</Text>
                 </View>
             </TouchableOpacity>
             {item.postImg && (
