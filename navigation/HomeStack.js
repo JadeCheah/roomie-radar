@@ -4,12 +4,12 @@ import HomeScreen from '../screens/HomeScreen';
 import AddPostScreen from '../screens/AddPostScreen';
 import AddPostUploadPhotoScreen from '../screens/AddPostUploadPhotoScreen';
 import CommentScreen from '../screens/CommentScreen';
-
 import { Modal, View, TextInput, Button, StyleSheet, Pressable, Text } from 'react-native';
+import OtherUsersProfileScreen from '../screens/OtherUsersProfileScreen';
 
 const Stack = createStackNavigator();
 
-const HomeDrawerNav = () => {
+const HomeStack = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const [newPostContent, setNewPostContent] = useState('');
 
@@ -33,7 +33,7 @@ const HomeDrawerNav = () => {
         <>
             <Stack.Navigator initialRouteName="Home">
                 <Stack.Screen 
-                    name="Home" 
+                    name="HomeScreen" 
                     component={HomeScreen}
                     options={({ navigation }) => ({
                         headerRight: () => (
@@ -47,40 +47,15 @@ const HomeDrawerNav = () => {
                                 <Text style={styles.addButtonText}>+</Text>
                             </Pressable>
                         ),
-                        headerTitle: "Home"
+                        headerTitle: "SHARE YOUR EXPERIENCES HERE"
                     })}
                 />
                 <Stack.Screen name="AddPost" component={AddPostScreen} />
                 <Stack.Screen name="HomePage" component={HomeScreen} options={{ headerShown: false }} />
+                <Stack.Screen name="OtherUsersProfileScreen" component={OtherUsersProfileScreen} options={{ headerShown: false }} />
             <Stack.Screen name="AddPostPhoto" component={AddPostUploadPhotoScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Comment" component={CommentScreen} />
             </Stack.Navigator>
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={() => setModalVisible(false)}
-            >
-                <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <TextInput
-                            placeholder="What's on your mind?"
-                            value={newPostContent}
-                            onChangeText={setNewPostContent}
-                            style={styles.modalText}
-                        />
-                        <Button
-                            title="Post"
-                            onPress={handleAddPost}
-                        />
-                        <Button
-                            title="Cancel"
-                            color="red"
-                            onPress={() => setModalVisible(false)}
-                        />
-                    </View>
-                </View>
-            </Modal>
         </>
     );
 }
@@ -126,4 +101,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default HomeDrawerNav;
+export default HomeStack;

@@ -1,18 +1,33 @@
-import React, { useContext } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, ImageBackground, ActivityIndicator } from 'react-native';
-import { UserProfileContext } from '../navigation/UserProfileContext';
+import React, { useEffect, useState, useContext } from 'react';
+import { View, Text, Image, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { firestore } from '../firebaseConfig'; // Adjust based on your project structure
+import { doc, getDoc } from 'firebase/firestore';
 
-const ProfileScreen = ({ navigation }) => {
-    const { profile, loading } = useContext(UserProfileContext);
+const OtherUsersProfileScreen = ({ route }) => {
+    const { userId } = route.params;
+    const [userProfile, setUserProfile] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const getUserProfile = async () => {
+            setLoading(true);
+            const userRef = doc(firestore, 'users', userId);
+            const docSnap = await getDoc(userRef);
+
+            if (docSnap.exists()) {
+                setUserProfile(docSnap.data());
+            } else {
+                console.log("No such document!");
+            }
+            setLoading(false);
+        };
+
+        getUserProfile();
+    }, [userId]);
 
     if (loading) {
-        return (
-            <View style={styles.loaderContainer}>
-                <ActivityIndicator size="large" color="#0000ff" />
-            </View>
-        );
+        return <ActivityIndicator size="large" color="#0000ff" />;
     }
-
     return (
         <View style={styles.container}>
             <ImageBackground 
@@ -98,4 +113,44 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ProfileScreen;
+export default OtherUsersProfileScreen;
+
+
+//     return (
+//         <ScrollView style={styles.container}>
+//             <Image source={{ uri: userProfile.profilePhoto }} style={styles.userImg} />
+//             <Text style={styles.userName}>{userProfile.userName}</Text>
+//             <Text style={styles.userBio}>{userProfile.userBio || "No bio available"}</Text>
+//             {/* Add additional user information and interactions as needed */}
+//         </ScrollView>
+//     );
+// };
+
+// const styles = StyleSheet.create({
+//     container: {
+//         flex: 1,
+//         padding: 20,
+//         backgroundColor: '#FFF'
+//     },
+//     userImg: {
+//         width: 120,
+//         height: 120,
+//         borderRadius: 60,
+//         alignSelf: 'center',
+//         marginTop: 20
+//     },
+//     userName: {
+//         fontSize: 22,
+//         fontWeight: 'bold',
+//         marginTop: 10,
+//         textAlign: 'center'
+//     },
+//     userBio: {
+//         fontSize: 16,
+//         color: '#666',
+//         marginTop: 10,
+//         textAlign: 'center'
+//     }
+// });
+
+// export default OtherUsersProfileScreen;

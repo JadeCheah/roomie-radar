@@ -17,19 +17,44 @@ const PostCard = ({ item }) => {
 
     const getTimeAgo = (timestamp) => {
         let date;
-        if (timestamp?.toDate) {  // Check if toDate exists indicating it's a Firestore Timestamp
-            date = timestamp.toDate();
-        } else if (typeof timestamp === 'string') {  // Check if it's a string, assume ISO string
-            date = parseISO(timestamp);
-        } else if (timestamp instanceof Date) {  // Check if it's already a Date object
-            date = timestamp;
-        } else {
-            console.error('Invalid timestamp received in getTimeAgo:', timestamp);
-            return 'Invalid date';  // Or handle this case as you see fit
-        }
+        console.log(typeof timestamp);
+
+        console.log(timestamp);
+        try {
+            // if (timestamp.toDate) {
+            //     date = timestamp.toDate();
+            // } else if (typeof timestamp === string) {
+            //     date = new Date(timestamp);
+            // } else if (timestamp instanceof Date) {
+            //     // It's already a Date object
+            //     date = timestamp;
+            // } else {
+            //     throw new Error('Invalid timestamp format');
+            // }
     
-        return formatDistanceToNow(date) + ' ago';
+            return convertDateString(timestamp) + '';
+        } catch (error) {
+            console.error('Error converting timestamp:', error);
+            return 'Invalid date';
+        }
     };
+
+    const convertDateString = (dateStr) => {
+        const parts = dateStr.split(", ");
+        const dateParts = parts[0].split('/');
+        const timeParts = parts[1].split(':');
+    
+        const newFormat = `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}T${timeParts[0]}:${timeParts[1]}:${timeParts[2]}`;
+        let date = new Date(newFormat);
+        return formatDistanceToNow(date) + ' ago';
+
+    };
+    
+
+    const openUserProfile = () => {
+        navigation.navigate('OtherUsersProfileScreen', { userId: item.userId }); // Make sure userId is properly passed here
+    };
+
     const handleLike = async () => {
         const postRef = doc(firestore, "posts", item._id);
         if (item.likes.includes(user.uid)) {
@@ -41,13 +66,13 @@ const PostCard = ({ item }) => {
 
     return (
         <View style={styles.card}>
-            <View style={styles.userInfo}>
+            <TouchableOpacity style={styles.userInfo} onPress={openUserProfile}>
                 <Image source={{ uri: item.userImg }} style={styles.userImg} />
                 <View style={styles.userInfoText}>
                     <Text style={styles.userName}>{item.userName}</Text>
-                    <Text style={styles.postTime}>{item.postTime}</Text>
+                    <Text style={styles.postTime}>{getTimeAgo(item.postTime)}</Text>
                 </View>
-            </View>
+            </TouchableOpacity>
             {item.postImg && (
                 <Image
                     source={{ uri: item.postImg }}
@@ -80,6 +105,7 @@ const styles = StyleSheet.create({
     userInfo: {
         flexDirection: 'row',
         alignItems: 'center',
+        marginBottom: 10, // Adjusted for spacing
     },
     userImg: {
         width: 50,

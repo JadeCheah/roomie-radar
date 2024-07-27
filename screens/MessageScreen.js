@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { FlatList, Text, TouchableOpacity, View, StyleSheet, Alert, Image, ImageBackground } from 'react-native';
 import { firestore } from '../firebaseConfig';
@@ -109,32 +110,31 @@ const MessageScreen = ({ navigation }) => {
     </ImageBackground>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10
   },
   addButton: {
-    padding: 10,
+    padding: 10,  
     position: 'absolute',
-    right: 10,
-    top: 10,
+    right: 20,
+    bottom: 20,  
     zIndex: 1,
     borderRadius: 20,
-    backgroundColor: '#FF7E5F', // Matching the aesthetic of the '+' button on HomeScreen
+    backgroundColor: '#2e64e5',  
   },
   addButtonText: {
-    fontSize: 24,
+    fontSize: 40,
     color: '#ffffff'
   },
   chatItem: {
     flexDirection: 'row',
     padding: 10,
-    backgroundColor: '#fff', // Light grey background for each chat item
+    backgroundColor: '#fff',
     alignItems: 'center',
-    borderRadius: 10, // Rounded corners for chat items
-    marginBottom: 10, // Space between chat items
+    borderRadius: 10,
+    marginBottom: 10,
   },
   profilePic: {
     width: 50,
@@ -156,8 +156,8 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 1,
-    backgroundColor: '#ddd', // Separator color
-    marginLeft: 60 // Indentation for the separator
+    backgroundColor: '#ddd',
+    marginLeft: 60
   }
 });
 
