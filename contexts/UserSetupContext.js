@@ -15,6 +15,7 @@ const UserSetupProvider = ({ children }) => {
         userName: '',
         userIntro: '',
         age: '',
+        yearOfStudy: '',
         gender: '',
         housing: '',
         sleepTimeStart: '00:00',
@@ -36,9 +37,9 @@ const UserSetupProvider = ({ children }) => {
 
     const handleCompleteProfile = async () => {
 
-        const { userName, userIntro, age, gender, housing } = tempDetails;
+        const { userName, userIntro, age, gender, housing, yearOfStudy } = tempDetails;
 
-        if (!userName || !userIntro || !age || !gender || !housing) {
+        if (!userName || !userIntro || !age || !gender || !housing || !yearOfStudy) {
             Alert.alert('Error', 'Please fill in all required fields');
             return null;
         }
@@ -64,6 +65,7 @@ const UserSetupProvider = ({ children }) => {
                     age: tempDetails.age,
                     gender: tempDetails.gender,
                     housing: tempDetails.housing,
+                    yearOfStudy: tempDetails.yearOfStudy,
                 }, { merge: true });
 
                 //set sleep doc includes: sleepTimeStart, sleepTimeEnd, wakeUpTimeStart, wakeUpTimeEnd

@@ -4,189 +4,143 @@ import { auth, firestore, usersRef } from '../firebaseConfig';
 import { collection, query, where, getDocs, doc, getDoc, collectionGroup } from 'firebase/firestore';
 // import { SearchBar } from 'react-native-elements';
 import { defaultProfilePhoto } from '../navigation/UserProfileContext';
-
-// const FindMatchesScreen = () => {
-//     const [users, setUsers] = useState([]);
-//     const [searchQuery, setSearchQuery] = useState('');
-
-//     useEffect(() => {
-//         fetchUsers();
-//     }, []);
-
-//     const fetchUsers = async () => {
-//         const user = auth.currentUser;
-
-//         if (user) {
-//             const usersRef = firestore.collection('users');
-//             const snapshot = await usersRef.where('id', '!=', currentUser.uid).get();
-
-//             const fetchedUsers = snapshot.docs.map(doc => {
-//                 const userData = doc.data();
-//                 return {
-//                     id: doc.id,
-//                     username: userData.username || 'Anonymous',
-//                     age: userData.age || 'N/A',
-//                     gender: userData.gender || 'N/A',
-//                     profilePic: userData.profilePic || defaultProfilePhoto,
-//                 };
-//             });
-
-//             setUsers(fetchedUsers);
-//         }
-//     };
-
-//     const handleSearch = (query) => {
-//         setSearchQuery(query);
-//     };
-
-//     const filteredUsers = users.filter(user =>
-//         user.username.toLowerCase().includes(searchQuery.toLowerCase())
-//     );
-
-//     const handleAddFriend = (userId) => {
-//         // Implement friend request logic here
-//         console.log(`Friend request sent to user ${userId}`);
-//     };
-
-//     const renderUserItem = ({ item }) => (
-//         <View style={styles.userItem}>
-//             <Image source={{ uri: item.profilePic }} style={styles.profilePic} />
-//             <View style={styles.userInfo}>
-//                 <Text style={styles.username}>{item.username}</Text>
-//                 <Text>Age: {item.age}, Gender: {item.gender}</Text>
-//             </View>
-//             <TouchableOpacity
-//                 style={styles.addButton}
-//                 onPress={() => handleAddFriend(item.id)}
-//             >
-//                 <Text style={styles.addButtonText}>Add Friend</Text>
-//             </TouchableOpacity>
-//         </View>
-//     );
-
-//     return (
-//         <View style={styles.container}>
-//             <SearchBar
-//                 placeholder="Search users..."
-//                 onChangeText={handleSearch}
-//                 value={searchQuery}
-//                 containerStyle={styles.searchBar}
-//             />
-//             <FlatList
-//                 data={filteredUsers}
-//                 renderItem={renderUserItem}
-//                 keyExtractor={item => item.id}
-//             />
-//         </View>
-//     );
-// };
-
-// const styles = StyleSheet.create({
-//     container: {
-//         flex: 1,
-//         backgroundColor: '#f5f5f5',
-//     },
-//     searchBar: {
-//         backgroundColor: 'transparent',
-//         borderTopWidth: 0,
-//         borderBottomWidth: 0,
-//     },
-//     userItem: {
-//         flexDirection: 'row',
-//         padding: 15,
-//         borderBottomWidth: 1,
-//         borderBottomColor: '#e0e0e0',
-//         alignItems: 'center',
-//     },
-//     profilePic: {
-//         width: 50,
-//         height: 50,
-//         borderRadius: 25,
-//     },
-//     userInfo: {
-//         flex: 1,
-//         marginLeft: 15,
-//     },
-//     username: {
-//         fontWeight: 'bold',
-//         fontSize: 16,
-//     },
-//     addButton: {
-//         backgroundColor: '#4CAF50',
-//         padding: 10,
-//         borderRadius: 5,
-//     },
-//     addButtonText: {
-//         color: 'white',
-//         fontWeight: 'bold',
-//     },
-// });
-
-// export default FindMatchesScreen;
+import { calculateMatchScore } from '../misc/matchCalculator';
+import { RotationGestureHandler } from 'react-native-gesture-handler';
 
 
 const FindMatchesScreen = () => {
     const [matches, setMatches] = useState([]);
     const [loading, setLoading] = useState(true);
-    const currentUser = auth.currentUser;
 
     useEffect(() => {
-        const fetchUserInfoAndMatches = async () => {
-            if (currentUser) {
-                try {
-                    // Get current user's 'main' preferences document
-                    const userMainPreferencesRef = doc(firestore, 'users', currentUser.uid, 'preferences', 'main');
-                    const userMainPreferencesSnap = await getDoc(userMainPreferencesRef);
-        
-                    if (userMainPreferencesSnap.exists()) {
-                        const userMainPreferences = userMainPreferencesSnap.data();
-                        const { age, gender } = userMainPreferences;
-        
-                        // Query all user documents
-                        const usersQuery = query(
-                            collection(firestore, 'users')
-                        );
-        
-                        const querySnapshot = await getDocs(usersQuery);
-        
-                        const fetchedMatches = [];
-                        for (const userDoc of querySnapshot.docs) {
-                            // Skip the current user
-                            if (userDoc.id === currentUser.uid) continue;
-        
-                            // Get the 'main' preferences document for this user
-                            const mainPreferencesRef = doc(userDoc.ref, 'preferences', 'main');
-                            const mainPreferencesSnap = await getDoc(mainPreferencesRef);
-        
-                            if (mainPreferencesSnap.exists()) {
-                                const mainPreferences = mainPreferencesSnap.data();
-                                
-                                // Check if this user matches the criteria
-                                if (mainPreferences.age === age && mainPreferences.gender === gender) {
-                                    fetchedMatches.push({
-                                        id: userDoc.id,
-                                        ...userDoc.data(),
-                                        mainPreferences: mainPreferences
-                                    });
-                                }
-                            }
-                        }
-        
-                        setMatches(fetchedMatches);
-                        console.log('Matches fetched!');
-                    } else {
-                        console.log('No main preferences document found for the current user!');
+        fetchMatches();
+    }, []);
+
+    const fetchUserPreferences = async (userId) => {
+        try {
+            const mainDocRef = doc(firestore, 'users', userId, 'preferences', 'main');
+            const sleepDocRef = doc(firestore, 'users', userId, 'preferences', 'sleep');
+
+            const mainDoc = await getDoc(mainDocRef);
+            const sleepDoc = await getDoc(sleepDocRef);
+
+            if (!mainDoc.exists() || !sleepDoc.exists()) {
+                console.error(`Preferences missing for user: ${userId}`);
+                return null;
+            }
+            console.log(`Fetched preferences for user: ${userId}`);
+            return {
+                main: mainDoc.data(),
+                sleep: sleepDoc.data()
+            };
+        } catch (error) {
+            console.error(`Error fetching preferences for user: ${userId}`, error);
+            return null;
+        }
+    };
+
+    const fetchMatches = async () => {
+        setLoading(true);
+        try {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const userDocRef = doc(firestore, 'users', user.uid);
+            const userDoc = await getDoc(userDocRef);
+            const userData = userDoc.data();
+
+            if (!userData) {
+                console.error('User data is missing', user.uid);
+                return;
+            }
+
+            const userPreferences = await fetchUserPreferences(user.uid);
+            if (!userPreferences) {
+                console.error('User preferences are missing or malformed:', userData);
+                return;
+            }
+
+            const { gender, housing } = userPreferences.main;
+
+            if (!gender || !housing) {
+                console.error('User main preferences are missing or incomplete:', mainPreferences);
+                return;
+            }
+            
+            console.log(`${gender} & ${housing} extracted from userPreferences.main`);
+
+            // const usersRef = collection(firestore, "users");
+            // const q = query(usersRef,
+            //     where("preferences.main.gender", "==", gender),
+            //     where("preferences.main.housing", "==", housing)
+            // );
+
+            // console.log("Query created:", q);
+
+            // const querySnapshot = await getDocs(q);
+
+            // console.log("QuerySnapshot size:", querySnapshot.size);
+            //-------------------------------------------------------------
+            // Query the users collection directly
+            const q = query(collection(firestore, 'users'));
+
+            console.log("Query created:", q); // Debugging statement
+
+            const querySnapshot = await getDocs(q);
+
+            console.log("Query snapshot size:", querySnapshot.size); // Debugging statement
+            //--------------------------------------------------------------
+            const matchesData = [];
+
+            for (const docSnapshot of querySnapshot.docs) {
+                const otherUserId = docSnapshot.id;
+                console.log("Processing document:", otherUserId); // Debugging statement
+                if (otherUserId !== user.uid) {
+                    const otherUserData = docSnapshot.data();
+                    const otherUserPreferences = await fetchUserPreferences(otherUserId);
+
+                    if (!otherUserPreferences) {
+                        console.error('Preferences are missing for user:', otherUserId);
+                        continue;
                     }
-                } catch (error) {
-                    console.error('Error fetching matches: ', error);
-                } finally {
-                    setLoading(false);
+
+                    if (otherUserPreferences.main.gender === gender && otherUserPreferences.main.housing === housing) {
+                        const matchScore = calculateMatchScore({ ...userData, preferences: userPreferences }, { ...otherUserData, preferences: otherUserPreferences });
+                        matchesData.push({
+                            userId: otherUserId,
+                            userName: otherUserData.userName || 'Unknown',
+                            profilePhoto: otherUserData.profilePhoto || defaultProfilePhoto,
+                            matchPercentage: matchScore
+                        });
+                        console.log(`${otherUserId} is pushed to matches with score: ${matchScore}`);
+                    }
                 }
             }
-        };
-        
-        fetchUserInfoAndMatches();
-    }, [currentUser]);
+
+            matchesData.sort((a, b) => b.matchPercentage - a.matchPercentage);
+            setMatches(matchesData);
+        } catch (error) {
+            console.error('Error finding matches: ', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const renderUserItem = ({ item }) => {
+        return (
+            <View style={styles.userItem}>
+                <Image source={{ uri: item.profilePhoto }} style={styles.profilePic} />
+                <View style={styles.userInfo}>
+                    <Text style={styles.username}>{item.userName}</Text>
+                    {/* <Text>{item.userIntro}</Text> */}
+                    <Text>Match: {item.matchPercentage}%</Text>
+                </View>
+                <TouchableOpacity style={styles.addButton} onPress={() => { }}>
+                    <Text style={styles.addButtonText}>Add Friend</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    };
 
     if (loading) {
         return (
@@ -198,23 +152,13 @@ const FindMatchesScreen = () => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Recommended Matches</Text>
+            {/* <Text style={styles.title}>Recommended Matches</Text>
             {matches.length === 0 ? (
                 <Text style={styles.caption}>No available matches yet!</Text>
             ) : (
-                <FlatList
-                    data={matches}
-                    keyExtractor={(item) => item.id}
-                    renderItem={({ item }) => (
-                        <View style={styles.matchItem}>
-                            <Text style={styles.matchText}>Name: {item.userName}</Text>
-                            <Text style={styles.matchText}>Email: {item.email}</Text>
-                            <Text style={styles.matchText}>Housing: {item.housing}</Text>
-                            <Text style={styles.matchText}>Gender: {item.gender}</Text>
-                        </View>
-                    )}
-                />
-            )}
+                <FlatList data={matches} renderItem={renderUserItem} keyExtractor={item => item.userId} />
+            )} */}
+            <FlatList data={matches} renderItem={renderUserItem} keyExtractor={item => item.userId} />
         </View>
     );
 };
@@ -224,7 +168,7 @@ export default FindMatchesScreen;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 16,
+        backgroundColor: '#fff'
     },
     title: {
         fontSize: 24,
@@ -233,22 +177,43 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         alignSelf: 'center',
     },
-    matchItem: {
-        padding: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: '#ccc',
-    },
-    matchText: {
+    caption: {
         fontSize: 18,
+        textAlign: 'center',
+        color: 'gray',
+    },
+    userItem: {
+        flexDirection: 'row',
+        padding: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ccc'
+    },
+    profilePic: {
+        width: 50,
+        height: 50,
+        borderRadius: 25
+    },
+    userInfo: {
+        marginLeft: 10,
+        justifyContent: 'center'
+    },
+    username: {
+        fontWeight: 'bold'
+    },
+    addButton: {
+        marginLeft: 'auto',
+        justifyContent: 'center',
+        backgroundColor: '#007bff',
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        borderRadius: 5
+    },
+    addButtonText: {
+        color: '#fff'
     },
     center: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
     },
-    caption: {
-        fontSize: 18,
-        textAlign: 'center',
-        color: 'gray',
-    }
-})
+});

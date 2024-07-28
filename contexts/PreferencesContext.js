@@ -8,6 +8,7 @@ const PreferencesContext = createContext();
 const PreferencesProvider = ({ children }) => {
     const [preferences, setPreferences] = useState({
         age: '',
+        yearOfStudy: '',
         gender: '',
         housing: '',
         sleepTimeStart: '00:00',
@@ -45,6 +46,7 @@ const PreferencesProvider = ({ children }) => {
                             const validatedData = {
                                 ...mainData, 
                                 age: mainData.age || '',
+                                yearOfStudy: mainData.yearOfStudy || '',
                                 gender: mainData.gender || '',
                                 housing: mainData.housing || '',
                             };
@@ -108,6 +110,7 @@ const PreferencesProvider = ({ children }) => {
                 //setDoc main
                 await setDoc(mainRef, {
                     age: tempPreferences.age,
+                    yearOfStudy: tempPreferences.yearOfStudy,
                     gender: tempPreferences.gender,
                     housing: tempPreferences.housing
                 }, { merge: true });

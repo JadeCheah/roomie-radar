@@ -108,7 +108,7 @@ const UserSetupScreen2 = ({ navigation }) => {
                         onChange={(event, date) => handleTimeChange('sleepTimeEnd', event, date)}
                     />
                 </View>
-                <View style={styles.sleepContainer}>
+                {/* <View style={styles.sleepContainer}>
                     <Text >Your Wake Time :</Text>
                     <DateTimePicker
                         value={parseTime(tempDetails.wakeUpTimeStart)}
@@ -125,7 +125,7 @@ const UserSetupScreen2 = ({ navigation }) => {
                         display="default"
                         onChange={(event, date) => handleTimeChange('wakeUpTimeEnd', event, date)}
                     />
-                </View>
+                </View> */}
             </View>
             <View style={styles.subContainer}>
                 <Text style={styles.inputTitle}>How flexible are you with your sleep schedule?</Text>
@@ -253,4 +253,3 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
 });
-

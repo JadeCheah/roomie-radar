@@ -69,6 +69,19 @@ const PreferencesScreen1 = ({ navigation }) => {
                 keyboardType='numeric'
                 returnKeyType='done'
             />
+            <Text style={styles.label}>Year of Study* : </Text>
+            <SegmentedButtons
+                style={styles.segButt}
+                value={tempPreferences.yearOfStudy}
+                onValueChange={(value) => handleChange('yearOfStudy', value)}
+                option
+                buttons={[
+                    { value: '1', label: '1', style: tempPreferences.yearOfStudy === '1' ? styles.checkedButt : styles.uncheckedButt },
+                    { value: '2', label: '2', style: tempPreferences.yearOfStudy === '2' ? styles.checkedButt : styles.uncheckedButt },
+                    { value: '3', label: '3', style: tempPreferences.yearOfStudy === '3' ? styles.checkedButt : styles.uncheckedButt },
+                    { value: '4', label: '4', style: tempPreferences.yearOfStudy === '4' ? styles.checkedButt : styles.uncheckedButt },
+                ]}
+            />
             <Text style={styles.label}>Your Gender* : </Text>
             <SegmentedButtons
                 style={styles.segButt}
