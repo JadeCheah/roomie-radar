@@ -66,79 +66,54 @@ const FindMatchesScreen = () => {
                 console.error('User main preferences are missing or incomplete:', mainPreferences);
                 return;
             }
-
+            
             console.log(`${gender} & ${housing} extracted from userPreferences.main`);
 
-            const q = query(collectionGroup(firestore, "main"),
-                where("gender", "==", gender),
-                where("housing", "==", housing)
-            );
+            // const usersRef = collection(firestore, "users");
+            // const q = query(usersRef,
+            //     where("preferences.main.gender", "==", gender),
+            //     where("preferences.main.housing", "==", housing)
+            // );
 
-            console.log("Query created:", q);
-
-            let querySnapshot;
-            try {
-                querySnapshot = await getDocs(q);
-            } catch (error) {
-                if (error.code === 'failed-precondition' || error.code === 'resource-exhausted') {
-                    console.error('Index not yet ready. Please wait a few minutes and try again.');
-                    setLoading(false);
-                    return;
-                }
-                throw error;
-            }
-
-            console.log("QuerySnapshot size:", querySnapshot.size);
-            //-------------------------------------------------------------
-            // Query the users collection directly
-            // const q = query(collection(firestore, 'users'));
-
-            // console.log("Query created:", q); // Debugging statement
+            // console.log("Query created:", q);
 
             // const querySnapshot = await getDocs(q);
 
-            // console.log("Query snapshot size:", querySnapshot.size); // Debugging statement
+            // console.log("QuerySnapshot size:", querySnapshot.size);
+            //-------------------------------------------------------------
+            // Query the users collection directly
+            const q = query(collection(firestore, 'users'));
+
+            console.log("Query created:", q); // Debugging statement
+
+            const querySnapshot = await getDocs(q);
+
+            console.log("Query snapshot size:", querySnapshot.size); // Debugging statement
             //--------------------------------------------------------------
             const matchesData = [];
 
             for (const docSnapshot of querySnapshot.docs) {
-                const preferenceDoc = docSnapshot.ref;
-                const userDoc = preferenceDoc.parent.parent;
-                console.log("Processing document:", userDoc.id); // Debugging statement
-                if (userDoc.id !== user.uid) {
-                    const otherUserData = (await getDoc(userDoc)).data();
-                    const otherUserPreferences = {
-                        main: docSnapshot.data(),
-                        sleep: (await getDoc(doc(preferenceDoc.parent, 'sleep'))).data()
-                    };
+                const otherUserId = docSnapshot.id;
+                console.log("Processing document:", otherUserId); // Debugging statement
+                if (otherUserId !== user.uid) {
+                    const otherUserData = docSnapshot.data();
+                    const otherUserPreferences = await fetchUserPreferences(otherUserId);
 
                     if (!otherUserPreferences) {
                         console.error('Preferences are missing for user:', otherUserId);
                         continue;
                     }
-                    //-------------------------------------------------------------------------------
-                    // if (otherUserPreferences.main.gender === gender && otherUserPreferences.main.housing === housing) {
-                    //     const matchScore = calculateMatchScore({ ...userData, preferences: userPreferences }, { ...otherUserData, preferences: otherUserPreferences });
-                    //     matchesData.push({
-                    //         userId: otherUserId,
-                    //         userName: otherUserData.userName || 'Unknown',
-                    //         profilePhoto: otherUserData.profilePhoto || defaultProfilePhoto,
-                    //         matchPercentage: matchScore
-                    //     });
-                    //     console.log(`${otherUserId} is pushed to matches with score: ${matchScore}`);
-                    // }
-                    //------------------------------------------------------------------------------
-                    const matchScore = calculateMatchScore(
-                        { ...await getDoc(doc(firestore, 'users', user.uid)).data(), preferences: userPreferences },
-                        { ...otherUserData, preferences: otherUserPreferences }
-                    );
-                    matchesData.push({
-                        userId: userDoc.id,
-                        userName: otherUserData.userName || 'Unknown',
-                        profilePhoto: otherUserData.profilePhoto || defaultProfilePhoto,
-                        matchPercentage: matchScore
-                    });
-                    console.log(`${userDoc.id} is pushed to matches with score: ${matchScore}`);
+
+                    if (otherUserPreferences.main.gender === gender && otherUserPreferences.main.housing === housing) {
+                        const matchScore = calculateMatchScore({ ...userData, preferences: userPreferences }, { ...otherUserData, preferences: otherUserPreferences });
+                        matchesData.push({
+                            userId: otherUserId,
+                            userName: otherUserData.userName || 'Unknown',
+                            profilePhoto: otherUserData.profilePhoto || defaultProfilePhoto,
+                            matchPercentage: matchScore
+                        });
+                        console.log(`${otherUserId} is pushed to matches with score: ${matchScore}`);
+                    }
                 }
             }
 
@@ -250,7 +225,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#007bff',
         paddingVertical: 5,
         paddingHorizontal: 10,
-        borderRadius: 5
+        borderRadius: 10,
     },
     addButtonText: {
         color: '#fff'
