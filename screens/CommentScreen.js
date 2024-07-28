@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, FlatList, TextInput, Button } from 'react-native';
+import { View, StyleSheet, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import { useAuth } from '../navigation/AuthProvider';
-import {
-  collection, addDoc, serverTimestamp, query, orderBy, onSnapshot,
-  runTransaction, doc
-} from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, runTransaction, doc } from 'firebase/firestore';
 import { firestore } from '../firebaseConfig';
 import CommentItem from '../components/CommentItem';
+import { GiftedChat } from 'react-native-gifted-chat';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const CommentScreen = ({ route }) => {
   const [comments, setComments] = useState([]);
@@ -25,14 +24,14 @@ const CommentScreen = ({ route }) => {
         createdAt: doc.data().createdAt,
         userName: doc.data().userName
       }));
-      setComments(incomingComments);
+      setComments(prevComments => GiftedChat.append(prevComments, incomingComments));
     });
 
     return () => unsubscribe();
   }, [postId]);
 
   const handleSend = async () => {
-    if (text) {
+    if (text.trim()) {
       const postRef = doc(firestore, `posts/${postId}`);
       const newCommentRef = doc(collection(firestore, `posts/${postId}/comments`));
 
@@ -40,7 +39,7 @@ const CommentScreen = ({ route }) => {
         const postSnapshot = await transaction.get(postRef);
         const currentCount = postSnapshot.data().commentsCount || 0;
         transaction.set(newCommentRef, {
-          text: text,
+          text: text.trim(),
           createdAt: serverTimestamp(),
           userId: user.uid,
           userName: user.displayName || "Anonymous",
@@ -55,12 +54,17 @@ const CommentScreen = ({ route }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView 
+      style={styles.container} 
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+    >
       <FlatList
         data={comments}
         keyExtractor={item => item._id}
         renderItem={({ item }) => <CommentItem comment={item} />}
         inverted
+        style={styles.commentsList}
       />
       <View style={styles.inputContainer}>
         <TextInput
@@ -68,28 +72,45 @@ const CommentScreen = ({ route }) => {
           value={text}
           onChangeText={setText}
           placeholder="Write a comment..."
+          placeholderTextColor="#666"
         />
-        <Button title="Send" onPress={handleSend} />
+        <TouchableOpacity onPress={handleSend} style={styles.sendButton}>
+          <MaterialCommunityIcons name="send-circle" size={44} color="#2e64e5" />
+        </TouchableOpacity>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
-
-export default CommentScreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFA500',  // Orange background
+  },
+  commentsList: {
+    flex: 1,
   },
   inputContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    backgroundColor: '#f0f0f0',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: '#fff',  // White input area
+    borderTopWidth: 1,
+    borderColor: '#ccc',  // Subtle border for the input area
   },
   input: {
     flex: 1,
     padding: 10,
+    marginRight: 10,
+    backgroundColor: '#f0f0f0',  // Light input field background
+    borderRadius: 25,  // Rounded corners for the input field
+    fontSize: 16,
+  },
+  sendButton: {
+    padding: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
+
+export default CommentScreen;
