@@ -13,6 +13,26 @@ const ProfileScreen = ({ navigation }) => {
         );}
         console.log(profile)
 
+        // Example of expanding the fetchUserPreferences function
+const fetchUserPreferences = async (userId) => {
+    const mainDocRef = doc(firestore, 'users', userId, 'preferences', 'main');
+    const sleepDocRef = doc(firestore, 'users', userId, 'preferences', 'sleep');
+    // Fetch documents
+    const mainDoc = await getDoc(mainDocRef);
+    const sleepDoc = await getDoc(sleepDocRef);
+    // Check if documents exist
+    if (!mainDoc.exists() || !sleepDoc.exists()) {
+        console.error(`Preferences missing for user: ${userId}`);
+        return null;
+    }
+    // Return combined data
+    return {
+        main: mainDoc.data(),
+        sleep: sleepDoc.data(),
+    };
+};
+
+
     return (
         <View style={styles.container}>
             <ImageBackground 
@@ -95,6 +115,11 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    userInfo: {
+        fontSize: 16,
+        color: '#666',
+        marginTop: 4,
     },
 });
 
