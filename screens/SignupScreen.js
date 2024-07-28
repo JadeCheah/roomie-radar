@@ -1,43 +1,48 @@
-import React, {useContext, useState} from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import React, { useContext, useState } from 'react';
+import { View, Text, TouchableOpacity, Image, StyleSheet, ImageBackground } from 'react-native';
 import FormInput from '../components/FormInput';
 import FormButton from '../components/FormButton';
 import SocialButton from '../components/SocialButton';
-import {AuthContext} from '../navigation/AuthProvider';
+import { AuthContext } from '../navigation/AuthProvider';
 import { UserProfileContext } from '../navigation/UserProfileContext';
 
-const SignupScreen = ({navigation}) => {
+const SignupScreen = ({ navigation }) => {
 
     const [email, setEmail] = useState();
     const [password, setPassword] = useState();
 
-    const {register} = useContext(AuthContext);
+    const { register } = useContext(AuthContext);
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.text}>Create an account</Text>
-            <FormInput
-                labelValue={email}
-                onChangeText={(userEmail) => setEmail(userEmail)}
-                placeholderText="Email"
-                iconType="user"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-            />
-            <FormInput
-                labelValue={password}
-                onChangeText={(userPassword) => setPassword(userPassword)}
-                placeholderText="Password"
-                iconType="lock"
-                secureTextEntry={true}
-            />
-            <FormButton
-                buttonTitle="Sign up"
-                onPress={() => register(email, password)}
-            />
+        <ImageBackground
+            source={require('../assets/orange-gradient.jpg')}
+            style={styles.background}
+            resizeMode="cover"
+        >
+            <View style={styles.container}>
+                <Text style={styles.text}>Create an account</Text>
+                <FormInput
+                    labelValue={email}
+                    onChangeText={(userEmail) => setEmail(userEmail)}
+                    placeholderText="Email"
+                    iconType="user"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                />
+                <FormInput
+                    labelValue={password}
+                    onChangeText={(userPassword) => setPassword(userPassword)}
+                    placeholderText="Password"
+                    iconType="lock"
+                    secureTextEntry={true}
+                />
+                <FormButton
+                    buttonTitle="Sign up"
+                    onPress={() => register(email, password)}
+                />
 
-            {/* <SocialButton
+                {/* <SocialButton
                 buttonTitle="Sign Up with Facebook"
                 buttonType="facebook"
                 color="#4867aa"
@@ -51,7 +56,9 @@ const SignupScreen = ({navigation}) => {
                 backgroundColor="#f5e7ea"
                 onPress={() => {}}
             /> */}
-        </View>
+            </View>
+
+        </ImageBackground>
     );
 };
 
@@ -63,20 +70,23 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: 20,
         paddingTop: 50
-      },
-      text: {
+    },
+    background: {
+        flex: 1,
+    },
+    text: {
         fontFamily: 'Kufam-SemiBoldItalic',
         fontSize: 28,
         marginBottom: 10,
         color: '#051d5f',
-      },
-      navButton: {
+    },
+    navButton: {
         marginTop: 15,
-      },
-      navButtonText: {
+    },
+    navButtonText: {
         fontSize: 18,
         fontWeight: '500',
         color: '#2e64e5',
         fontFamily: 'Lato-Regular',
-      },
+    },
 });

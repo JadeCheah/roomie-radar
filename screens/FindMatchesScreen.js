@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, Image, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, Image, TouchableOpacity, ImageBackground } from 'react-native';
 import { auth, firestore, usersRef } from '../firebaseConfig';
 import { collection, query, where, getDocs, doc, getDoc, collectionGroup } from 'firebase/firestore';
 // import { SearchBar } from 'react-native-elements';
@@ -66,54 +66,79 @@ const FindMatchesScreen = () => {
                 console.error('User main preferences are missing or incomplete:', mainPreferences);
                 return;
             }
-            
+
             console.log(`${gender} & ${housing} extracted from userPreferences.main`);
 
-            // const usersRef = collection(firestore, "users");
-            // const q = query(usersRef,
-            //     where("preferences.main.gender", "==", gender),
-            //     where("preferences.main.housing", "==", housing)
-            // );
+            const q = query(collectionGroup(firestore, "main"),
+                where("gender", "==", gender),
+                where("housing", "==", housing)
+            );
 
-            // console.log("Query created:", q);
+            console.log("Query created:", q);
+
+            let querySnapshot;
+            try {
+                querySnapshot = await getDocs(q);
+            } catch (error) {
+                if (error.code === 'failed-precondition' || error.code === 'resource-exhausted') {
+                    console.error('Index not yet ready. Please wait a few minutes and try again.');
+                    setLoading(false);
+                    return;
+                }
+                throw error;
+            }
+
+            console.log("QuerySnapshot size:", querySnapshot.size);
+            //-------------------------------------------------------------
+            // Query the users collection directly
+            // const q = query(collection(firestore, 'users'));
+
+            // console.log("Query created:", q); // Debugging statement
 
             // const querySnapshot = await getDocs(q);
 
-            // console.log("QuerySnapshot size:", querySnapshot.size);
-            //-------------------------------------------------------------
-            // Query the users collection directly
-            const q = query(collection(firestore, 'users'));
-
-            console.log("Query created:", q); // Debugging statement
-
-            const querySnapshot = await getDocs(q);
-
-            console.log("Query snapshot size:", querySnapshot.size); // Debugging statement
+            // console.log("Query snapshot size:", querySnapshot.size); // Debugging statement
             //--------------------------------------------------------------
             const matchesData = [];
 
             for (const docSnapshot of querySnapshot.docs) {
-                const otherUserId = docSnapshot.id;
-                console.log("Processing document:", otherUserId); // Debugging statement
-                if (otherUserId !== user.uid) {
-                    const otherUserData = docSnapshot.data();
-                    const otherUserPreferences = await fetchUserPreferences(otherUserId);
+                const preferenceDoc = docSnapshot.ref;
+                const userDoc = preferenceDoc.parent.parent;
+                console.log("Processing document:", userDoc.id); // Debugging statement
+                if (userDoc.id !== user.uid) {
+                    const otherUserData = (await getDoc(userDoc)).data();
+                    const otherUserPreferences = {
+                        main: docSnapshot.data(),
+                        sleep: (await getDoc(doc(preferenceDoc.parent, 'sleep'))).data()
+                    };
 
                     if (!otherUserPreferences) {
                         console.error('Preferences are missing for user:', otherUserId);
                         continue;
                     }
-
-                    if (otherUserPreferences.main.gender === gender && otherUserPreferences.main.housing === housing) {
-                        const matchScore = calculateMatchScore({ ...userData, preferences: userPreferences }, { ...otherUserData, preferences: otherUserPreferences });
-                        matchesData.push({
-                            userId: otherUserId,
-                            userName: otherUserData.userName || 'Unknown',
-                            profilePhoto: otherUserData.profilePhoto || defaultProfilePhoto,
-                            matchPercentage: matchScore
-                        });
-                        console.log(`${otherUserId} is pushed to matches with score: ${matchScore}`);
-                    }
+                    //-------------------------------------------------------------------------------
+                    // if (otherUserPreferences.main.gender === gender && otherUserPreferences.main.housing === housing) {
+                    //     const matchScore = calculateMatchScore({ ...userData, preferences: userPreferences }, { ...otherUserData, preferences: otherUserPreferences });
+                    //     matchesData.push({
+                    //         userId: otherUserId,
+                    //         userName: otherUserData.userName || 'Unknown',
+                    //         profilePhoto: otherUserData.profilePhoto || defaultProfilePhoto,
+                    //         matchPercentage: matchScore
+                    //     });
+                    //     console.log(`${otherUserId} is pushed to matches with score: ${matchScore}`);
+                    // }
+                    //------------------------------------------------------------------------------
+                    const matchScore = calculateMatchScore(
+                        { ...await getDoc(doc(firestore, 'users', user.uid)).data(), preferences: userPreferences },
+                        { ...otherUserData, preferences: otherUserPreferences }
+                    );
+                    matchesData.push({
+                        userId: userDoc.id,
+                        userName: otherUserData.userName || 'Unknown',
+                        profilePhoto: otherUserData.profilePhoto || defaultProfilePhoto,
+                        matchPercentage: matchScore
+                    });
+                    console.log(`${userDoc.id} is pushed to matches with score: ${matchScore}`);
                 }
             }
 
@@ -144,31 +169,49 @@ const FindMatchesScreen = () => {
 
     if (loading) {
         return (
-            <View style={styles.center}>
-                <ActivityIndicator size='large' color='#0000ff' />
-            </View>
+            <ImageBackground
+                source={require('../assets/orange-gradient.jpg')}
+                style={styles.background}
+                resizeMode="cover"
+            >
+                <View style={styles.center}>
+                    <ActivityIndicator size='large' color='white' />
+                    <Text style={styles.caption}>Loading matches.... this might take a while</Text>
+                </View>
+            </ImageBackground>
         );
     }
 
     return (
-        <View style={styles.container}>
-            {/* <Text style={styles.title}>Recommended Matches</Text>
+        <ImageBackground
+            source={require('../assets/orange-gradient.jpg')}
+            style={styles.background}
+            resizeMode="cover"
+        >
+            <View style={styles.overlay}>
+                {/* <Text style={styles.title}>Recommended Matches</Text>
             {matches.length === 0 ? (
                 <Text style={styles.caption}>No available matches yet!</Text>
             ) : (
                 <FlatList data={matches} renderItem={renderUserItem} keyExtractor={item => item.userId} />
             )} */}
-            <FlatList data={matches} renderItem={renderUserItem} keyExtractor={item => item.userId} />
-        </View>
+                <FlatList data={matches} renderItem={renderUserItem} keyExtractor={item => item.userId} />
+            </View>
+        </ImageBackground>
     );
 };
 
 export default FindMatchesScreen;
 
 const styles = StyleSheet.create({
-    container: {
+    background: {
         flex: 1,
-        backgroundColor: '#fff'
+        justifyContent: 'center',
+    },
+    overlay: {
+        flex: 1,
+        backgroundColor: 'rgba(255, 255, 255, 0.5)', // Semi-transparent overlay
+        padding: 20,
     },
     title: {
         fontSize: 24,
@@ -180,7 +223,8 @@ const styles = StyleSheet.create({
     caption: {
         fontSize: 18,
         textAlign: 'center',
-        color: 'gray',
+        color: 'white',
+        paddingTop: 25,
     },
     userItem: {
         flexDirection: 'row',
