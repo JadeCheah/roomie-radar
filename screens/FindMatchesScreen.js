@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, Image, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, Image, TouchableOpacity, ImageBackground } from 'react-native';
 import { auth, firestore, usersRef } from '../firebaseConfig';
 import { collection, query, where, getDocs, doc, getDoc, collectionGroup } from 'firebase/firestore';
 // import { SearchBar } from 'react-native-elements';
@@ -144,31 +144,49 @@ const FindMatchesScreen = () => {
 
     if (loading) {
         return (
-            <View style={styles.center}>
-                <ActivityIndicator size='large' color='#0000ff' />
-            </View>
+            <ImageBackground
+                source={require('../assets/orange-gradient.jpg')}
+                style={styles.background}
+                resizeMode="cover"
+            >
+                <View style={styles.center}>
+                    <ActivityIndicator size='large' color='white' />
+                    <Text style={styles.caption}>Loading matches.... this might take a while</Text>
+                </View>
+            </ImageBackground>
         );
     }
 
     return (
-        <View style={styles.container}>
-            {/* <Text style={styles.title}>Recommended Matches</Text>
+        <ImageBackground
+            source={require('../assets/orange-gradient.jpg')}
+            style={styles.background}
+            resizeMode="cover"
+        >
+            <View style={styles.overlay}>
+                {/* <Text style={styles.title}>Recommended Matches</Text>
             {matches.length === 0 ? (
                 <Text style={styles.caption}>No available matches yet!</Text>
             ) : (
                 <FlatList data={matches} renderItem={renderUserItem} keyExtractor={item => item.userId} />
             )} */}
-            <FlatList data={matches} renderItem={renderUserItem} keyExtractor={item => item.userId} />
-        </View>
+                <FlatList data={matches} renderItem={renderUserItem} keyExtractor={item => item.userId} />
+            </View>
+        </ImageBackground>
     );
 };
 
 export default FindMatchesScreen;
 
 const styles = StyleSheet.create({
-    container: {
+    background: {
         flex: 1,
-        backgroundColor: '#fff'
+        justifyContent: 'center',
+    },
+    overlay: {
+        flex: 1,
+        backgroundColor: 'rgba(255, 255, 255, 0.5)', // Semi-transparent overlay
+        padding: 20,
     },
     title: {
         fontSize: 24,
@@ -180,7 +198,8 @@ const styles = StyleSheet.create({
     caption: {
         fontSize: 18,
         textAlign: 'center',
-        color: 'gray',
+        color: 'white',
+        paddingTop: 25,
     },
     userItem: {
         flexDirection: 'row',
@@ -206,7 +225,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#007bff',
         paddingVertical: 5,
         paddingHorizontal: 10,
-        borderRadius: 5
+        borderRadius: 10,
     },
     addButtonText: {
         color: '#fff'

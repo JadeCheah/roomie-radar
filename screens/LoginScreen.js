@@ -1,49 +1,54 @@
-import React, {useContext, useState} from "react";
-import { StyleSheet, TouchableOpacity, Image, View, Text } from "react-native";
+import React, { useContext, useState } from "react";
+import { StyleSheet, TouchableOpacity, Image, View, Text, ImageBackground } from "react-native";
 import FormInput from '../components/FormInput';
 import FormButton from '../components/FormButton';
 import SocialButton from '../components/SocialButton';
-import {AuthContext} from '../navigation/AuthProvider';
+import { AuthContext } from '../navigation/AuthProvider';
 
-const LoginScreen = ({navigation}) =>  {
+const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
 
-  const {login} = useContext(AuthContext);
+  const { login } = useContext(AuthContext);
 
   return (
-    <View style = {styles.container}>
-      <Image source={require('../assets/Roomie-radar-white-background-1.png')}
-      style={styles.logo}
-      />
-      <Text style={styles.text}>Roomie Radar</Text>
-      <FormInput
-        labelValue={email}
-        onChangeText={(userEmail) => setEmail(userEmail)}
-        placeholderText="Email"
-        iconType="user"
-        keyboardType="email-address"
-        autoCapitalize="none"
-        autoCorrect={false}
-      />
-      <FormInput
-        labelValue={password}
-        onChangeText={(userPassword) => setPassword(userPassword)}
-        placeholderText="Password"
-        iconType="lock"
-        secureTextEntry={true}
-      />
-      <FormButton
-        buttonTitle="Sign In"
-        onPress={() => login(email, password)}
-      />
-      {/* <TouchableOpacity 
+    <ImageBackground
+      source={require('../assets/orange-gradient.jpg')}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.container}>
+        <Image source={require('../assets/Roomie-radar-white-background-1.png')}
+          style={styles.logo}
+        />
+        <Text style={styles.text}>Roomie Radar</Text>
+        <FormInput
+          labelValue={email}
+          onChangeText={(userEmail) => setEmail(userEmail)}
+          placeholderText="Email"
+          iconType="user"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoCorrect={false}
+        />
+        <FormInput
+          labelValue={password}
+          onChangeText={(userPassword) => setPassword(userPassword)}
+          placeholderText="Password"
+          iconType="lock"
+          secureTextEntry={true}
+        />
+        <FormButton
+          buttonTitle="Sign In"
+          onPress={() => login(email, password)}
+        />
+        {/* <TouchableOpacity 
         style={styles.forgotButton} 
         onPress={() => {}}>
         <Text style={styles.navButtonText}>Forgot Password?</Text>
       </TouchableOpacity> */}
-      
-      {/* <SocialButton
+
+        {/* <SocialButton
         buttonTitle="Sign In with Facebook"
         buttonType="facebook"
         color="#4867aa"
@@ -57,12 +62,13 @@ const LoginScreen = ({navigation}) =>  {
         backgroundColor="#f5e7ea"
         onPress={() => {}}
       /> */}
-      <TouchableOpacity 
-        style={styles.forgotButton} 
-        onPress={() => navigation.navigate('Signup')}>
-        <Text style={styles.navButtonText}>Don't have an account? Create here</Text>
-      </TouchableOpacity>
-    </View>
+        <TouchableOpacity
+          style={styles.forgotButton}
+          onPress={() => navigation.navigate('Signup')}>
+          <Text style={styles.navButtonText}>Don't have an account? Create here</Text>
+        </TouchableOpacity>
+      </View>
+    </ImageBackground>
   );
 };
 
@@ -74,6 +80,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     paddingTop: 50
+  },
+  background: {
+    flex: 1,
   },
   logo: {
     marginTop: 100,
@@ -98,7 +107,7 @@ const styles = StyleSheet.create({
   navButtonText: {
     fontSize: 18,
     fontWeight: '500',
-    color: '#2e64e5',
+    color: 'white',
     fontFamily: 'Lato-Regular',
   },
 });

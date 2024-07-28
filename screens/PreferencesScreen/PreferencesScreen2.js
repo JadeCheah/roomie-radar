@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, ScrollView, Button, StyleSheet, TextInput, Picker, Alert } from 'react-native';
+import { View, Text, ScrollView, Button, StyleSheet, TextInput, Picker, Alert, ImageBackground } from 'react-native';
 import { auth, firestore } from '../../firebaseConfig';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { ActivityIndicator, SegmentedButtons } from 'react-native-paper';
@@ -74,101 +74,155 @@ const PreferencesScreen2 = ({ navigation }) => {
     };
 
     //for other preferences 
-    const [tidiness, setTidiness] = useState('');
+    // const [tidiness, setTidiness] = useState('');
 
     return (
-        <ScrollView>
-            <View style={styles.container}>
-                <Text style={{ color: "#2e64e5", fontSize: 15 }} onPress={() => { navigation.goBack() }}>Go Back</Text>
-                <Text style={styles.label}>Your Preferred Sleep Schedule :</Text>
-                <View style={styles.sleepContainer}>
-                    <Text>Your Sleep Time :</Text>
-                    <DateTimePicker
-                        value={parseTime(tempPreferences.sleepTimeStart)}
-                        mode="time"
-                        is24Hour={true}
-                        display="default"
-                        onChange={(event, date) => handleTimeChange('sleepTimeStart', event, date)}
-                    />
-                    <Text style={styles.toText}> to </Text>
-                    <DateTimePicker
-                        value={parseTime(tempPreferences.sleepTimeEnd)}
-                        mode="time"
-                        is24Hour={true}
-                        display="default"
-                        onChange={(event, date) => handleTimeChange('sleepTimeEnd', event, date)}
-                    />
+        <ImageBackground
+            source={require('../../assets/orange-gradient.jpg')}
+            style={styles.background}
+            resizeMode="cover"
+        >
+            <ScrollView>
+                <View style={styles.container}>
+                    <View style={styles.backButt}>
+                        <Text style={{ color: "white", fontSize: 15, fontFamily: 'Lato-Regular', fontWeight: 'bold' }} onPress={() => { navigation.goBack() }}>Go Back</Text>
+                    </View>
+                    <View style={styles.sleepContainer}>
+                        <Text style={styles.label}>Your Preferred Sleep Schedule :</Text>
+                        <View style={styles.container1}>
+                            <DateTimePicker
+                                value={parseTime(tempPreferences.sleepTimeStart)}
+                                mode="time"
+                                is24Hour={true}
+                                display="default"
+                                onChange={(event, date) => handleTimeChange('sleepTimeStart', event, date)}
+                            />
+                            <Text style={styles.toText}> to </Text>
+                            <DateTimePicker
+                                value={parseTime(tempPreferences.sleepTimeEnd)}
+                                mode="time"
+                                is24Hour={true}
+                                display="default"
+                                onChange={(event, date) => handleTimeChange('sleepTimeEnd', event, date)}
+                            />
+                        </View>
+                    </View>
+                    <View style={styles.cont}>
+                        <Text style={styles.label}>How flexible are you with your sleep schedule?</Text>
+                        <View style={styles.sliderCont}>
+                            <Slider
+                                style={{ width: windowWidth * 0.9, height: 40 }}
+                                value={tempPreferences.sleepScheduleFlexibility}
+                                minimumValue={0}
+                                maximumValue={1}
+                                onValueChange={(value) => handleChange('sleepScheduleFlexibility', value)}
+                                step={0.5}
+                            />
+                            <Text style={{ fontSize: 18 }}>{showSleepFlex(tempPreferences.sleepScheduleFlexibility)}</Text>
+                        </View>
+                    </View>
+                    <View style={styles.cont}>
+                        <Text style={styles.label}>Do you prefer to sleep with lights on/off?</Text>
+                        <View style={styles.lightCont}>
+                            {tempPreferences.sleepLightsOnOff === "Lights off" && <MaterialCommunityIcons name='lightbulb-off' size='50' />}
+                            {tempPreferences.sleepLightsOnOff === "No preference" && <MaterialCommunityIcons name='lightbulb-multiple-outline' size='50'
+                                style={{ color: '#ada693' }} />}
+                            {tempPreferences.sleepLightsOnOff === "Lights on" && <MaterialCommunityIcons name='lightbulb-on' size='50'
+                                style={{ color: '#faba0a' }} />}
+                        </View>
+                        <View style={styles.sliderCont}>
+                            <Slider
+                                style={{ width: windowWidth * 0.9, height: 40 }}
+                                value={sleepLightStringToNum(tempPreferences.sleepLightsOnOff)}
+                                minimumValue={0}
+                                maximumValue={1}
+                                onValueChange={(sliderValue) => { formatSetSleepLight(sliderValue) }}
+                                step={0.5}
+                            />
+                            <Text style={{ fontSize: 18 }}>{tempPreferences.sleepLightsOnOff}</Text>
+                        </View>
+                    </View>
+                    {saving && <ActivityIndicator size="small" color="#0000ff" />}
+                    <FormButton buttonTitle="Save Preferences" onPress={savePreferences} />
                 </View>
-                <Text style={styles.label}>How flexible are you with your sleep schedule?</Text>
-                <View style={styles.sliderCont}>
-                    <Slider
-                        style={{ width: windowWidth * 0.9, height: 40 }}
-                        value={tempPreferences.sleepScheduleFlexibility}
-                        minimumValue={0}
-                        maximumValue={1}
-                        onValueChange={(value) => handleChange('sleepScheduleFlexibility', value)}
-                        step={0.5}
-                    />
-                    <Text style={{ fontSize: 18 }}>{showSleepFlex(tempPreferences.sleepScheduleFlexibility)}</Text>
-                </View>
-                <Text style={styles.label}>Do you prefer to sleep with lights on/off?</Text>
-                <View style={styles.lightCont}>
-                    {tempPreferences.sleepLightsOnOff === "Lights off" && <MaterialCommunityIcons name='lightbulb-off' size='50' />}
-                    {tempPreferences.sleepLightsOnOff === "No preference" && <MaterialCommunityIcons name='lightbulb-multiple-outline' size='50'
-                        style={{ color: '#ada693' }} />}
-                    {tempPreferences.sleepLightsOnOff === "Lights on" && <MaterialCommunityIcons name='lightbulb-on' size='50'
-                        style={{ color: '#faba0a' }} />}
-                </View>
-                <View style={styles.sliderCont}>
-                    <Slider
-                        style={{ width: windowWidth * 0.9, height: 40 }}
-                        value={sleepLightStringToNum(tempPreferences.sleepLightsOnOff)}
-                        minimumValue={0}
-                        maximumValue={1}
-                        onValueChange={(sliderValue) => { formatSetSleepLight(sliderValue) }}
-                        step={0.5}
-                    />
-                    <Text style={{ fontSize: 18 }}>{tempPreferences.sleepLightsOnOff}</Text>
-                </View>
-                {saving && <ActivityIndicator size="small" color="#0000ff" />}
-                <FormButton buttonTitle="Save Preferences" onPress={savePreferences} />
-            </View>
-        </ScrollView>
+            </ScrollView>
+        </ImageBackground>
     );
 }
 
 export default PreferencesScreen2;
 
 const styles = StyleSheet.create({
+    background: {
+        flex: 1,
+        justifyContent: 'center',
+    },
     container: {
         flexGrow: 1,
-        paddingVertical: '3%',
-        paddingHorizontal: 18,
+        paddingVertical: 5,
+        paddingHorizontal: 20,
         justifyContent: 'space-between',
     },
     label: {
-        padding: 3,
-        fontSize: 20,
+        paddingVertical: 8,
+        fontSize: 18,
         fontFamily: 'Lato-Regular',
-        marginBottom: 8, //Add margin for spacing
+        marginBottom: 10, // Add margin for spacing
         fontWeight: 'bold',
+        color: '#333', // Darker color for better readability
     },
     sliderCont: {
         flexDirection: 'column',
         alignItems: 'center',
-        padding: '4%',
+        paddingVertical: 10,
+        paddingHorizontal: 10,
     },
     lightCont: {
-        flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        marginVertical: 10,
     },
     sleepContainer: {
-        flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: '9%',
+        marginVertical: '3%',
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        padding: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5, // Elevation for Android
     },
     toText: {
+        paddingTop: '2%',
         marginLeft: 10,
+        marginRight: 0,
+        fontSize: 16,
     },
+    container1: {
+        flexDirection: 'row',
+    },
+    cont: {
+        backgroundColor: 'white',
+        borderRadius: 10,
+        marginVertical: '3%',
+        padding: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5, // Elevation for Android
+    },
+    backButt: {
+        backgroundColor: '#2e64e5',
+        padding: 5,
+        marginRight: '80%',
+        borderRadius: 8, 
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5, // Elevation for Android
+    }
 })
