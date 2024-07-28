@@ -5,6 +5,8 @@ import { AuthContext } from "../navigation/AuthProvider";
 import { firestore } from '../firebaseConfig';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
+//test
+
 const AddPostScreen = ({ navigation, route }) => {
     const [postText, setPostText] = useState('');
     const [postImg, setPostImg] = useState(route.params?.postImg || ''); // Default to empty or the incoming URI
