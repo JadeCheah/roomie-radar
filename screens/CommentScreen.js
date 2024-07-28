@@ -16,20 +16,22 @@ const CommentScreen = ({ route }) => {
   useEffect(() => {
     const commentsRef = collection(firestore, `posts/${postId}/comments`);
     const q = query(commentsRef, orderBy('createdAt', 'desc'));
-
+  
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const incomingComments = snapshot.docs.map(doc => ({
         _id: doc.id,
         text: doc.data().text,
-        createdAt: doc.data().createdAt,
+        createdAt: doc.data().createdAt, // Ensure the date is converted if it's a Timestamp
         userName: doc.data().userName
       }));
-      setComments(prevComments => GiftedChat.append(prevComments, incomingComments));
+      // Sort the comments right after fetching to maintain consistency
+      const sortedComments = incomingComments.sort((a, b) => b.createdAt - a.createdAt);
+      setComments(sortedComments);
     });
-
+  
     return () => unsubscribe();
   }, [postId]);
-
+  
   const handleSend = async () => {
     if (text.trim()) {
       const postRef = doc(firestore, `posts/${postId}`);
