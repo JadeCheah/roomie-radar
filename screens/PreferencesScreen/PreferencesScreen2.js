@@ -79,6 +79,7 @@ const PreferencesScreen2 = ({ navigation }) => {
     return (
         <ScrollView>
             <View style={styles.container}>
+                <Text style={{ color: "#2e64e5", fontSize: 15 }} onPress={() => { navigation.goBack() }}>Go Back</Text>
                 <Text style={styles.label}>Your Preferred Sleep Schedule :</Text>
                 <View style={styles.sleepContainer}>
                     <Text>Your Sleep Time :</Text>
@@ -96,24 +97,6 @@ const PreferencesScreen2 = ({ navigation }) => {
                         is24Hour={true}
                         display="default"
                         onChange={(event, date) => handleTimeChange('sleepTimeEnd', event, date)}
-                    />
-                </View>
-                <View style={styles.sleepContainer}>
-                    <Text >Your Wake Time :</Text>
-                    <DateTimePicker
-                        value={parseTime(tempPreferences.wakeUpTimeStart)}
-                        mode="time"
-                        is24Hour={true}
-                        display="default"
-                        onChange={(event, date) => handleTimeChange('wakeUpTimeStart', event, date)}
-                    />
-                    <Text style={styles.toText}> to </Text>
-                    <DateTimePicker
-                        value={parseTime(tempPreferences.wakeUpTimeEnd)}
-                        mode="time"
-                        is24Hour={true}
-                        display="default"
-                        onChange={(event, date) => handleTimeChange('wakeUpTimeEnd', event, date)}
                     />
                 </View>
                 <Text style={styles.label}>How flexible are you with your sleep schedule?</Text>
@@ -145,7 +128,7 @@ const PreferencesScreen2 = ({ navigation }) => {
                         onValueChange={(sliderValue) => { formatSetSleepLight(sliderValue) }}
                         step={0.5}
                     />
-                    <Text style={{ fontSize: 18}}>{tempPreferences.sleepLightsOnOff}</Text>
+                    <Text style={{ fontSize: 18 }}>{tempPreferences.sleepLightsOnOff}</Text>
                 </View>
                 {saving && <ActivityIndicator size="small" color="#0000ff" />}
                 <FormButton buttonTitle="Save Preferences" onPress={savePreferences} />

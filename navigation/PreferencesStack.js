@@ -13,8 +13,8 @@ const PreferencesStack = ({ navigation }) => {
     return (
         <PreferencesProvider>
             <Stack.Navigator initialRouteName="Preferences 1">
-                <Stack.Screen name="Preferences 1" component={PreferencesScreen1} options={{ headerShown: true, title: 'General' }} />
-                <Stack.Screen name="Preferences 2" component={PreferencesScreen2} options={{ headerShown: true, title:'Sleep' }} />
+                <Stack.Screen name="Preferences 1" component={PreferencesScreen1} options={{ headerShown: false, title: 'General' }} />
+                <Stack.Screen name="Preferences 2" component={PreferencesScreen2} options={{ headerShown: false, title:'Sleep' }} />
             </Stack.Navigator>
         </PreferencesProvider>
     );

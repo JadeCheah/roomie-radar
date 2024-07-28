@@ -66,6 +66,20 @@ const UserSetupScreen1 = ({ navigation }) => {
                 returnKeyType='done'
             />
 
+            <Text style={styles.inputTitle}>Year of Study: *</Text>
+            <SegmentedButtons
+                style={styles.segButt}
+                value={tempDetails.yearOfStudy}
+                onValueChange={(value) => handleChange('yearOfStudy', value)}
+                option
+                buttons={[
+                    { value: '1', label: '1', style: tempDetails.yearOfStudy === '1' ? styles.checkedButt : styles.uncheckedButt },
+                    { value: '2', label: '2', style: tempDetails.yearOfStudy === '2' ? styles.checkedButt : styles.uncheckedButt },
+                    { value: '3', label: '3', style: tempDetails.yearOfStudy === '3' ? styles.checkedButt : styles.uncheckedButt },
+                    { value: '4', label: '4', style: tempDetails.yearOfStudy === '4' ? styles.checkedButt : styles.uncheckedButt },
+                ]}
+            />
+
             <Text style={styles.inputTitle}>Gender *</Text>
             <SegmentedButtons
                 style={styles.segButt}
@@ -86,9 +100,9 @@ const UserSetupScreen1 = ({ navigation }) => {
                 value={housingOption}
                 items={items}
                 setOpen={setOpen}
-                setValue={(callback) => { 
+                setValue={(callback) => {
                     const value = callback(housingOption);
-                    setHousingOption(value); 
+                    setHousingOption(value);
                     handleChange('housing', value);
                 }}
                 setItems={setItems}
@@ -98,7 +112,7 @@ const UserSetupScreen1 = ({ navigation }) => {
 
             {/* <Button title="Complete Profile" onPress={handleCompleteProfile}/> */}
             {/* <FormButton buttonTitle="Complete Profile" onPress={handleCompletion} /> */}
-            <FormButton buttonTitle="Next" onPress={() => {navigation.navigate('Setup 2')}} />
+            <FormButton buttonTitle="Next" onPress={() => { navigation.navigate('Setup 2') }} />
         </View>
     );
 }
@@ -145,4 +159,3 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
     },
 });
-
