@@ -5,7 +5,7 @@ import { arrayUnion, arrayRemove, doc, updateDoc } from "firebase/firestore";
 import { firestore } from '../firebaseConfig';
 import { useAuth } from '../navigation/AuthProvider';
 import { useNavigation } from '@react-navigation/native';
-import { formatDistanceToNow } from 'date-fns';
+import { parse, formatDistanceToNow, isValid } from 'date-fns';
 
 const PostCard = ({ item }) => {
     const { user } = useAuth();
@@ -16,21 +16,37 @@ const PostCard = ({ item }) => {
     const commentText = item.commentsCount === 0 ? "Comment" : item.commentsCount === 1 ? '1 Comment' : `${item.commentsCount} Comments`;
 
 
-    const convertDateString = (dateStr) => {
-        const parts = dateStr.split(", ");
-        const dateParts = parts[0].split('/');
-        const timeParts = parts[1].split(':');
-    
-        const newFormat = `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}T${timeParts[0]}:${timeParts[1]}:${timeParts[2]}`;
-        let date = new Date(newFormat);
-        return formatDistanceToNow(date) + ' ago';
-
+    const sanitizeDateString = (dateStr) => {
+        // Replace various types of spaces with standard space and trim any whitespace
+        return dateStr.replace(/\s/g, ' ').trim();
     };
-    
+
+    const convertDateString = (dateStr) => {
+        const cleanedDateStr = sanitizeDateString(dateStr);
+        console.log("Cleaned date string:", cleanedDateStr);
+
+        try {
+            const hasAmPm = cleanedDateStr.match(/\bAM\b|\bPM\b/i);
+            const formatString = hasAmPm ? "d/M/yyyy, h:mm:ss a" : "d/M/yyyy, HH:mm:ss";
+
+            const date = parse(cleanedDateStr, formatString, new Date());
+            console.log("Parsed date:", date, "Is valid:", isValid(date));
+
+            if (!isValid(date)) {
+                throw new Error('Date is invalid');
+            }
+
+            return formatDistanceToNow(date) + ' ago';
+        } catch (error) {
+            console.error('Date conversion error:', error);
+            return 'Invalid date';  // Provide a fallback or error message
+        }
+    };
+
 
     const openUserProfile = () => {
         console.log(item.userId);
-        navigation.navigate('OtherUsersProfileScreen', { userId: item.userId }); 
+        navigation.navigate('OtherUsersProfileScreen', { userId: item.userId });
     };
 
     const handleLike = async () => {
