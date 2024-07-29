@@ -58,6 +58,8 @@ const UserSetupProvider = ({ children }) => {
                     userName: tempDetails.userName,
                     userIntro: tempDetails.userIntro,
                     isProfileComplete: true,
+                    gender: tempDetails.gender,
+                    housing: tempDetails.housing,
                 }, { merge: true });
 
                 //set main doc includes: age, gender, housing

@@ -1,8 +1,16 @@
 import React, { useContext } from 'react';
 import { Button, View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, ImageBackground, ActivityIndicator } from 'react-native';
 import { UserProfileContext } from '../navigation/UserProfileContext';
+// import migrateUserData from '../misc/migrationScript';
 
 const ProfileScreen = ({ navigation }) => {
+    // const handleMigration = async() => {
+    //     migrateUserData().then(() => {
+    //         console.log("Migration script completed.");
+    //       }).catch((error) => {
+    //         console.error("Migration script failed:", error);
+    //       });
+    // }
     
     const { profile, loading } = useContext(UserProfileContext);
 
@@ -50,6 +58,7 @@ const ProfileScreen = ({ navigation }) => {
                         <TouchableOpacity style={styles.userBtn} onPress={() => navigation.navigate('Edit Profile')}>
                             <Text style={styles.userBtnText}>Edit Profile</Text>
                         </TouchableOpacity>
+                        {/* <Button onPress={handleMigration} title='handle migration'></Button> */}
                     </View>
                 </ScrollView>
             </ImageBackground>

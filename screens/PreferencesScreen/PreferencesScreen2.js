@@ -84,6 +84,7 @@ const PreferencesScreen2 = ({ navigation }) => {
         >
             <ScrollView>
                 <View style={styles.container}>
+                    
                     <View style={styles.backButt}>
                         <Text style={{ color: "white", fontSize: 15, fontFamily: 'Lato-Regular', fontWeight: 'bold' }} onPress={() => { navigation.goBack() }}>Go Back</Text>
                     </View>

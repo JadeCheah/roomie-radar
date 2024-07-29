@@ -97,20 +97,7 @@ const PreferencesScreen1 = ({ navigation }) => {
                         ]}
                     />
                 </View>
-                <View style={styles.box}>
-                    <Text style={styles.label}>Your Gender* : </Text>
-                    <SegmentedButtons
-                        style={styles.segButt}
-                        value={tempPreferences.gender}
-                        onValueChange={(value) => handleChange('gender', value)}
-                        option
-                        buttons={[
-                            { value: 'Male', label: 'Male', style: tempPreferences.gender === 'Male' ? styles.checkedButt : styles.uncheckedButt },
-                            { value: 'Female', label: 'Female', style: tempPreferences.gender === 'Female' ? styles.checkedButt : styles.uncheckedButt },
-                        ]}
-                    />
-                </View>
-                <View style={styles.box}>
+                <View style={styles.box1}>
                     <Text style={styles.label}>Your Housing* : </Text>
                     <DropDownPicker style={styles.dropdown}
                         placeholder='Select a housing option'
@@ -124,6 +111,19 @@ const PreferencesScreen1 = ({ navigation }) => {
                             handleChange('housing', value);
                         }}
                         setItems={setItems}
+                    />
+                </View>
+                <View style={styles.box}>
+                    <Text style={styles.label}>Your Gender* : </Text>
+                    <SegmentedButtons
+                        style={styles.segButt}
+                        value={tempPreferences.gender}
+                        onValueChange={(value) => handleChange('gender', value)}
+                        option
+                        buttons={[
+                            { value: 'Male', label: 'Male', style: tempPreferences.gender === 'Male' ? styles.checkedButt : styles.uncheckedButt },
+                            { value: 'Female', label: 'Female', style: tempPreferences.gender === 'Female' ? styles.checkedButt : styles.uncheckedButt },
+                        ]}
                     />
                 </View>
                 <View style={styles.buttContainer}>
@@ -201,6 +201,7 @@ const styles = StyleSheet.create({
         shadowRadius: 10,
         // Elevation property for Android
         elevation: 10,
+        zIndex: 1, // Lower zIndex, stays in the back
     },
     nextButton: {
         marginRight: 10,
@@ -216,5 +217,19 @@ const styles = StyleSheet.create({
         shadowRadius: 10,
         // Elevation property for Android
         elevation: 10,
+        zIndex: 1, // Lower zIndex, stays in the back
+    },
+    box1: {
+        backgroundColor: '#fff',
+        padding: 10,
+        borderRadius: 14,
+        // Shadow properties for iOS
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 5 },
+        shadowOpacity: 0.3,
+        shadowRadius: 10,
+        // Elevation property for Android
+        elevation: 10,
+        zIndex: 2, // Lower zIndex, stays in the back
     }
 })

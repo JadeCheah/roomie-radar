@@ -103,9 +103,16 @@ const PreferencesProvider = ({ children }) => {
         if (user) {
             setSaving(true);
             try {
+                const userDocRef = doc(firestore, 'users', user.uid);
                 const mainRef = doc(firestore, 'users', user.uid, 'preferences', 'main');
                 const sleepRef = doc(firestore, 'users', user.uid, 'preferences', 'sleep');
                 // const tidinessRef = doc(firestore, 'users', user.uid, 'preferences', 'tidiness');
+
+                //set user doc 
+                await setDoc(userDocRef, {
+                    gender: tempPreferences.gender,
+                    housing: tempPreferences.housing
+                }, { merge: true });
 
                 //setDoc main
                 await setDoc(mainRef, {

@@ -7,7 +7,6 @@ import CommentScreen from '../screens/CommentScreen';
 import { StyleSheet, Pressable, Text } from 'react-native';
 import OtherUsersProfileScreen from '../screens/OtherUsersProfileScreen';
 import ChatScreen from '../screens/ChatScreen';
-import FindMatchesScreen from '../screens/FindMatchesScreen';
 
 const Stack = createStackNavigator();
 
@@ -16,34 +15,34 @@ const HomeStack = () => {
     const [newPostContent, setNewPostContent] = useState('');
 
     const handleAddPost = async () => {
-      if (newPostContent.trim()) {
-          await addDoc(collection(firestore, "posts"), {
-              post: newPostContent,
-              postTime: serverTimestamp(),
-              userImg: user.photoURL, // Assuming you store the user's photo URL in the auth context
-              userName: user.displayName,
-              likes: 0,
-              commentsCount: 0,
-              liked: false
-          });
-          setNewPostContent('');
-          setModalVisible(false);
-      }
-  };
+        if (newPostContent.trim()) {
+            await addDoc(collection(firestore, "posts"), {
+                post: newPostContent,
+                postTime: serverTimestamp(),
+                userImg: user.photoURL, // Assuming you store the user's photo URL in the auth context
+                userName: user.displayName,
+                likes: 0,
+                commentsCount: 0,
+                liked: false
+            });
+            setNewPostContent('');
+            setModalVisible(false);
+        }
+    };
 
     return (
         <>
             <Stack.Navigator initialRouteName="Home">
-                <Stack.Screen 
-                    name="HomeScreen" 
+                <Stack.Screen
+                    name="HomeScreen"
                     component={HomeScreen}
                     options={({ navigation }) => ({
                         headerRight: () => (
-                            <Pressable 
+                            <Pressable
                                 onPress={() => navigation.navigate('AddPost')}
                                 style={({ pressed }) => [
                                     styles.addButton,
-                                    { backgroundColor:  '#ffffff' }
+                                    { backgroundColor: '#ffffff' }
                                 ]}
                             >
                                 <Text style={styles.addButtonText}>+</Text>
@@ -56,9 +55,8 @@ const HomeStack = () => {
                 <Stack.Screen name="HomePage" component={HomeScreen} options={{ headerShown: false }} />
                 <Stack.Screen name="OtherUsersProfileScreen" component={OtherUsersProfileScreen} options={{ headerShown: false }} />
                 <Stack.Screen name="ChatScreen" component={ChatScreen} />
-            <Stack.Screen name="AddPostPhoto" component={AddPostUploadPhotoScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="Comment" component={CommentScreen} />
-            <Stack.Screen name="FindMatches" component={FindMatchesScreen} />
+                <Stack.Screen name="AddPostPhoto" component={AddPostUploadPhotoScreen} options={{ headerShown: false }} />
+                <Stack.Screen name="Comment" component={CommentScreen} />
             </Stack.Navigator>
         </>
     );
