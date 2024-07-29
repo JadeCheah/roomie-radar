@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import HomeStack from './HomeStack';
 import ChatStack from './ChatStack';
-import FindMatchesScreen from '../screens/FindMatchesScreen';
+import MatchStack from './MatchStack';
 import ProfileDrawer from './ProfileDrawerNav';
 
 const Tab = createBottomTabNavigator();
@@ -24,7 +24,7 @@ const MyTabs = () => {
             />
             <Tab.Screen
                 name="Find Matches"
-                component={FindMatchesScreen}
+                component={MatchStack}
                 options={{
                   tabBarIcon: ({ color, size }) => (
                       <MaterialCommunityIcons name="radar" color={color} size={size} />

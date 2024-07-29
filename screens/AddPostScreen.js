@@ -1,11 +1,14 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import { View, TextInput, StyleSheet, ImageBackground, TouchableWithoutFeedback, Keyboard, Image } from 'react-native';
 import GradualButton from '../components/GradualButton';
 import { AuthContext } from "../navigation/AuthProvider";
 import { firestore } from '../firebaseConfig';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { LogBox } from 'react-native';
 
-//test
+LogBox.ignoreLogs([
+  'Non-serializable values were found in the navigation state',
+]);
 
 const AddPostScreen = ({ navigation, route }) => {
     const [postText, setPostText] = useState('');
@@ -14,7 +17,7 @@ const AddPostScreen = ({ navigation, route }) => {
 
     useEffect(() => {
         if (route.params?.postImg) {
-            setPostImg(route.params.postImg);
+            setPostImg(route.params.postImg);  // Ensure this is the Firebase URL
         }
     }, [route.params?.postImg]);
 
@@ -26,7 +29,7 @@ const AddPostScreen = ({ navigation, route }) => {
                 userImg: user.photoURL,
                 postTime: serverTimestamp(),
                 post: postText.trim(),
-                postImg: postImg,
+                postImg: postImg,  // This should be the public URL from Firebase Storage
                 liked: false,
                 likes: [],
                 commentsCount: 0,

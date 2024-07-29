@@ -7,6 +7,7 @@ import CommentScreen from '../screens/CommentScreen';
 import { StyleSheet, Pressable, Text } from 'react-native';
 import OtherUsersProfileScreen from '../screens/OtherUsersProfileScreen';
 import ChatScreen from '../screens/ChatScreen';
+import FindMatchesScreen from '../screens/FindMatchesScreen';
 
 const Stack = createStackNavigator();
 
@@ -57,6 +58,7 @@ const HomeStack = () => {
                 <Stack.Screen name="ChatScreen" component={ChatScreen} />
             <Stack.Screen name="AddPostPhoto" component={AddPostUploadPhotoScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Comment" component={CommentScreen} />
+            <Stack.Screen name="FindMatches" component={FindMatchesScreen} />
             </Stack.Navigator>
         </>
     );

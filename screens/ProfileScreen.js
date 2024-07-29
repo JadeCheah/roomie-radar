@@ -1,8 +1,9 @@
 import React, { useContext } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, ImageBackground, ActivityIndicator } from 'react-native';
+import { Button, View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, ImageBackground, ActivityIndicator } from 'react-native';
 import { UserProfileContext } from '../navigation/UserProfileContext';
 
 const ProfileScreen = ({ navigation }) => {
+    
     const { profile, loading } = useContext(UserProfileContext);
 
     if (loading) {
@@ -10,32 +11,33 @@ const ProfileScreen = ({ navigation }) => {
             <View style={styles.loaderContainer}>
                 <ActivityIndicator size="large" color="#0000ff" />
             </View>
-        );}
-        console.log(profile)
-
-        // Example of expanding the fetchUserPreferences function
-const fetchUserPreferences = async (userId) => {
-    const mainDocRef = doc(firestore, 'users', userId, 'preferences', 'main');
-    const sleepDocRef = doc(firestore, 'users', userId, 'preferences', 'sleep');
-    // Fetch documents
-    const mainDoc = await getDoc(mainDocRef);
-    const sleepDoc = await getDoc(sleepDocRef);
-    // Check if documents exist
-    if (!mainDoc.exists() || !sleepDoc.exists()) {
-        console.error(`Preferences missing for user: ${userId}`);
-        return null;
+        );
     }
-    // Return combined data
-    return {
-        main: mainDoc.data(),
-        sleep: sleepDoc.data(),
+    console.log(profile)
+
+    // Example of expanding the fetchUserPreferences function
+    const fetchUserPreferences = async (userId) => {
+        const mainDocRef = doc(firestore, 'users', userId, 'preferences', 'main');
+        const sleepDocRef = doc(firestore, 'users', userId, 'preferences', 'sleep');
+        // Fetch documents
+        const mainDoc = await getDoc(mainDocRef);
+        const sleepDoc = await getDoc(sleepDocRef);
+        // Check if documents exist
+        if (!mainDoc.exists() || !sleepDoc.exists()) {
+            console.error(`Preferences missing for user: ${userId}`);
+            return null;
+        }
+        // Return combined data
+        return {
+            main: mainDoc.data(),
+            sleep: sleepDoc.data(),
+        };
     };
-};
 
 
     return (
         <View style={styles.container}>
-            <ImageBackground 
+            <ImageBackground
                 source={require('../assets/orange-gradient.jpg')}
                 style={styles.background}
                 resizeMode="cover"
@@ -72,7 +74,7 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         padding: 20,
         width: '90%',
-        height  : '80%',
+        height: '80%',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,

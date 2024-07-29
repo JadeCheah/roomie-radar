@@ -1,63 +1,74 @@
 import React from 'react';
 import { firestore } from '../firebaseConfig';
-import { collection, doc, getDocs, setDoc, updateDoc, deleteField, getDoc } from 'firebase/firestore';
+import { collection, doc, getDocs, setDoc, updateDoc, deleteField, getDoc, writeBatch } from 'firebase/firestore';
 
 const extractId = (uid) => {
     //This extracts the first 8 characters of the UID
-    return uid.substring(0,8);
+    return uid.substring(0, 8);
 }
 
-async function migrateUserData() {
+
+const migrateUserData = async () => {
     const usersRef = collection(firestore, 'users');
-    const snapshot = await getDocs(usersRef);
+    let batch = writeBatch(firestore);
+    let userCount = 0;
+    let successCount = 0;
+    let errorCount = 0;
 
-    for (const userDoc of snapshot.docs) {
-        const userData = userDoc.data();
-        const userRef = userDoc.ref; // ref field of the queryDocumentSnapshot object 
+    try {
+        const querySnapshot = await getDocs(usersRef);
 
-        //check if the 'preferences' subcollection exists
-        const preferencesRef = collection(userRef, 'preferences');
-        const preferencesSnapshot = await getDocs(preferencesRef); 
-        if (!preferencesSnapshot.empty) {
-            console.log(`User ${userDoc.id} already has preferences. Skipping.`);
-            continue;
+        for (const userDoc of querySnapshot.docs) {
+            userCount++;
+            const userId = userDoc.id;
+            const userData = userDoc.data();
+
+            try {
+                const preferencesRef = doc(usersRef, userId, 'preferences', 'main');
+                const preferencesSnap = await getDoc(preferencesRef);
+
+                if (preferencesSnap.exists()) {
+                    const preferencesData = preferencesSnap.data();
+                    const { gender, housing } = preferencesData;
+
+                    // Update user document with gender and housing
+                    batch.update(doc(usersRef, userId), {
+                        gender: gender || null,
+                        housing: housing || null
+                    });
+
+                    successCount++;
+                    console.log(`Migrated data for user ${userId}`);
+                } else {
+                    console.log(`No preferences found for user ${userId}`);
+                }
+            } catch (error) {
+                errorCount++;
+                console.error(`Error migrating data for user ${userId}:`, error);
+            }
+
+            // Commit batch every 500 operations to avoid exceeding limits
+            if (userCount % 500 === 0) {
+                await batch.commit();
+                batch = writeBatch(firestore);
+            }
         }
 
-        //extract id from UID, add new id field 
-        const extractedId = extractId(userDoc.id);
-        await updateDoc(userRef, { id: extractedId }); //this id is different from the queryDocumentSnapshot object id field 
-
-        //create 'main' document in preferences 
-        await setDoc(doc(preferencesRef, 'main'), {
-            age: userData.age || '',
-            gender: userData.gender || '',
-            housing: userData.housing || ''
-        });
-
-        //create 'sleep' document in preferences 
-        await setDoc(doc(preferencesRef, 'sleep'), {
-            sleepTimeStart: userData.sleepTimeStart || '00:00',
-            sleepTimeEnd: userData.sleepTimeEnd || '00:00',
-            wakeUpTimeStart: userData.wakeUpTimeStart || '00:00',
-            wakeUpTimeEnd: userData.wakeUpTimeEnd || '00:00',
-            sleepScheduleFlexibility: userData.sleepScheduleFlexibility || 0,
-            sleepLightsOnOff: userData.sleepLightsOnOff || 'No preference'
-        });
-
-        //Remove age, gender, housing from the main document if it exists 
-        if (userData.age !== undefined) {
-            await updateDoc(userRef, { age: null });
+        // Commit any remaining operations
+        if (userCount % 500 !== 0) {
+            await batch.commit();
         }
-        if (userData.gender !== undefined) {
-            await updateDoc(userRef, { gender: null });
-        }
-        if (userData.housing !== undefined) {
-            await updateDoc(userRef, { housing: null });
-        }
-        console.log(`Migrated user ${userDoc.id}`);
+
+        console.log(`
+        Migration completed:
+        Total users processed: ${userCount}
+        Successful migrations: ${successCount}
+        Errors encountered: ${errorCount}
+      `);
+
+    } catch (error) {
+        console.error("Error in migration process:", error);
     }
-    
-    console.log('Migration completed');
-}
+};
 
 export default migrateUserData;

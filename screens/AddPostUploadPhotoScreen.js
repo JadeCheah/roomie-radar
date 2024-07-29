@@ -81,8 +81,7 @@ const AddPostUploadPhotoScreen = ({ navigation, route }) => {
     }
 };
 
-
-  const dismissKeyboard = () => Keyboard.dismiss();
+const dismissKeyboard = () => Keyboard.dismiss();
 
   if (!cameraPermission || !libraryPermission) {
     return (
