@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, Image, TouchableOpacity, ImageBackground } from 'react-native';
 import { auth, firestore, usersRef } from '../firebaseConfig';
-import { collection, query, where, getDocs, doc, getDoc, collectionGroup } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, getDoc, onSnapshot, collectionGroup } from 'firebase/firestore';
 // import { SearchBar } from 'react-native-elements';
 import { defaultProfilePhoto } from '../navigation/UserProfileContext';
 import { calculateMatchScore } from '../misc/matchCalculator';
@@ -18,8 +18,39 @@ const FindMatchesScreen = ({navigation}) => {
     };
 
     useEffect(() => {
-        fetchMatches();
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const mainPreferencesRef = doc(firestore, 'users', user.uid, 'preferences', 'main');
+        const sleepPreferencesRef = doc(firestore, 'users', user.uid, 'preferences', 'sleep');
+        
+        // Listener for the main preferences document
+        const unsubscribeMain = onSnapshot(mainPreferencesRef, (snapshot) => {
+            if (snapshot.exists()) {
+                const mainPreferences = snapshot.data();
+                fetchMatches(mainPreferences, null);
+            }
+        }, (error) => {
+            console.error('Error fetching main preferences: ', error);
+        });
+
+        // Listener for the sleep preferences document
+        const unsubscribeSleep = onSnapshot(sleepPreferencesRef, (snapshot) => {
+            if (snapshot.exists()) {
+                const sleepPreferences = snapshot.data();
+                fetchMatches(null, sleepPreferences);
+            }
+        }, (error) => {
+            console.error('Error fetching sleep preferences: ', error);
+        });
+
+        // Clean up listeners on unmount
+        return () => {
+            unsubscribeMain();
+            unsubscribeSleep();
+        };
     }, []);
+    
 
     const fetchUserPreferences = async (userId) => {
         try {
@@ -44,7 +75,7 @@ const FindMatchesScreen = ({navigation}) => {
         }
     };
 
-    const fetchMatches = async () => {
+    const fetchMatches = async (mainPreferences, sleepPreferences) => {
         setLoading(true);
         try {
             const user = auth.currentUser;
@@ -59,7 +90,8 @@ const FindMatchesScreen = ({navigation}) => {
                 return;
             }
 
-            const { gender, housing } = userData;
+            const gender = mainPreferences?.gender || userData.gender;
+            const housing = mainPreferences?.housing || userData.housing;
 
             if (!gender || !housing) {
                 console.error('User gender or housing is missing or incomplete:', userData);

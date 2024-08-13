@@ -11,6 +11,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import Slider from '@react-native-community/slider';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { windowWidth } from '../../utils/Dimensions';
+import { CommonActions } from '@react-navigation/native';
 
 
 const UserSetupScreen2 = ({ navigation }) => {
@@ -78,7 +79,12 @@ const UserSetupScreen2 = ({ navigation }) => {
         try {
             const result = await handleCompleteProfile();
             if (result !== null) {
-                navigation.navigate('TabStack');
+                navigation.dispatch(
+                    CommonActions.reset({
+                        index: 0,
+                        routes: [{ name: 'TabStack' }],
+                    })
+                );
             }
         } catch (error) {
             console.error('Error completing profile: ', error);
