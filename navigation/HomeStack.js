@@ -55,8 +55,8 @@ const HomeStack = () => {
                 <Stack.Screen name="HomePage" component={HomeScreen} options={{ headerShown: false }} />
                 <Stack.Screen name="OtherUsersProfileScreen" component={OtherUsersProfileScreen} options={{ headerShown: false }} />
                 <Stack.Screen name="ChatScreen" component={ChatScreen} />
-            <Stack.Screen name="AddPostPhoto" component={AddPostUploadPhotoScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="Comment" component={CommentScreen} />
+                <Stack.Screen name="AddPostPhoto" component={AddPostUploadPhotoScreen} options={{ headerShown: false }} />
+                <Stack.Screen name="Comment" component={CommentScreen} />
             </Stack.Navigator>
         </>
     );
