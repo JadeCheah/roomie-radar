@@ -168,6 +168,7 @@ const UserSetupScreen2 = ({ navigation }) => {
                     <Text style={{ fontSize: 18 }}>{tempDetails.sleepLightsOnOff}</Text>
                 </View>
             </View>
+
             <FormButton buttonTitle="Complete Profile" onPress={handleCompletion} />
         </View>
     );

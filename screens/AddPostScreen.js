@@ -1,46 +1,94 @@
-import React, {useState, useEffect, useContext} from 'react';
-import { View, TextInput, StyleSheet, ImageBackground, TouchableWithoutFeedback, Keyboard, Image } from 'react-native';
-import GradualButton from '../components/GradualButton';
-import { AuthContext } from "../navigation/AuthProvider";
+// import React, { useState, useContext } from 'react';
+// import { View, TextInput, StyleSheet, ImageBackground, TouchableWithoutFeedback, Keyboard, Image } from 'react-native';
+// import GradualButton from '../components/GradualButton';
+// import { AuthContext } from "../navigation/AuthProvider";
+// import { firestore } from '../firebaseConfig';
+// import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+
+
+//     const handlePhotoSelected = (photoUrl) => {
+//         setPostImg(photoUrl);
+//     };
+
+//     const dismissKeyboard = () => Keyboard.dismiss();
+
+//     return (
+//         <ImageBackground
+//             source={require('../assets/orange-gradient.jpg')}
+//             style={styles.container}
+//             resizeMode="cover"
+//         >
+//             <TouchableWithoutFeedback onPress={dismissKeyboard}>
+//                 <View style={styles.inner}>
+//                     {postImg ? (
+//                         <Image
+//                             source={{ uri: postImg }}
+//                             style={styles.imagePreview}
+//                         />
+//                     ) : null}
+//                     <TextInput
+//                         placeholder="What's on your mind?"
+//                         style={styles.textInput}
+//                         value={postText}
+//                         onChangeText={setPostText}
+//                         multiline={true}
+//                         numberOfLines={4}
+//                     />
+//                     <GradualButton title="Post" onPress={handleAddPost} />
+//                     <GradualButton 
+//                         title="Add Photo" 
+//                         onPress={() => navigation.navigate('AddPostUploadPhotoScreen', { onPhotoSelected: handlePhotoSelected })} 
+//                     />
+//                     <GradualButton title="Back" onPress={() => navigation.goBack()} />
+//                 </View>
+//             </TouchableWithoutFeedback>
+//         </ImageBackground>
+//     );
+// };
+
+
+
+
+
+
+import React, { useState, useContext } from "react";
+import { View, TextInput, StyleSheet, ImageBackground } from "react-native";
+import FormButton from '../components/FormButton';
 import { firestore } from '../firebaseConfig';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { LogBox } from 'react-native';
+import { AuthContext } from "../navigation/AuthProvider";
+ import GradualButton from '../components/GradualButton';
+import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from 'firebase/firestore';
 
-LogBox.ignoreLogs([
-  'Non-serializable values were found in the navigation state',
-]);
 
-const AddPostScreen = ({ navigation, route }) => {
+const AddPostScreen = ({ navigation }) => {
     const [postText, setPostText] = useState('');
-    const [postImg, setPostImg] = useState(route.params?.postImg || ''); // Default to empty or the incoming URI
+    const [postImg, setPostImg] = useState('');
     const { user } = useContext(AuthContext);
 
-    useEffect(() => {
-        if (route.params?.postImg) {
-            setPostImg(route.params.postImg);  // Ensure this is the Firebase URL
-        }
-    }, [route.params?.postImg]);
+        const handlePhotoSelected = (photoUrl) => {
+        setPostImg(photoUrl);
+    };
+
 
     const handleAddPost = async () => {
-        if (postText.trim().length > 0) {
-            await addDoc(collection(firestore, 'posts'), {
+        if (postText.length > 0) {
+            console.log(firestore);
+            await addDoc(collection(firestore, 'posts'),{
                 userName: user.displayName,
-                userId: user.uid,
                 userImg: user.photoURL,
-                postTime: serverTimestamp(),
-                post: postText.trim(),
-                postImg: postImg,  // This should be the public URL from Firebase Storage
+                postTime: new Date(),
+                post: postText,
+                postImg: postImg, 
                 liked: false,
                 likes: [],
                 commentsCount: 0,
             });
             setPostText('');
-            setPostImg('');
+            setPostImg('');  // Reset image URI after posting
             navigation.goBack();
         }
     };
-
-    const dismissKeyboard = () => Keyboard.dismiss();
+         const dismissKeyboard = () => Keyboard.dismiss();
 
     return (
         <ImageBackground
@@ -48,30 +96,49 @@ const AddPostScreen = ({ navigation, route }) => {
             style={styles.container}
             resizeMode="cover"
         >
-            <TouchableWithoutFeedback onPress={dismissKeyboard}>
-                <View style={styles.inner}>
-                    {postImg ? (
-                        <Image
-                            source={{ uri: postImg }}
-                            style={styles.imagePreview}
-                        />
-                    ) : null}
-                    <TextInput
-                        placeholder="What's on your mind?"
-                        style={styles.textInput}
-                        value={postText}
-                        onChangeText={setPostText}
-                        multiline={true}
-                        numberOfLines={4}
+        <View style={styles.inner}>
+            <TextInput
+                placeholder="What's on your mind?"
+                style={styles.textInput}
+                value={postText}
+                onChangeText={setPostText}
+                
+            />
+            <GradualButton title="Post" onPress={handleAddPost} />
+                     <GradualButton 
+                        title="Add Photo" 
+                        onPress={() => navigation.navigate('AddPostPhoto', { onPhotoSelected: setPostImg })} 
                     />
-                    <GradualButton title="Post" onPress={handleAddPost} />
-                    <GradualButton title="Add Photo" onPress={() => navigation.navigate('AddPostPhoto', { onPhotoSelected: setPostImg })} />
                     <GradualButton title="Back" onPress={() => navigation.goBack()} />
                 </View>
-            </TouchableWithoutFeedback>
         </ImageBackground>
     );
 };
+
+//<TouchableWithoutFeedback onPress={dismissKeyboard}>
+//                 <View style={styles.inner}>
+//                     {postImg ? (
+//                         <Image
+//                             source={{ uri: postImg }}
+//                             style={styles.imagePreview}
+//                         />
+//                     ) : null}
+//                     <TextInput
+//                         placeholder="What's on your mind?"
+//                         style={styles.textInput}
+//                         value={postText}
+//                         onChangeText={setPostText}
+//                         multiline={true}
+//                         numberOfLines={4}
+//                     />
+//                     <GradualButton title="Post" onPress={handleAddPost} />
+//                     <GradualButton 
+//                         title="Add Photo" 
+//                         onPress={() => navigation.navigate('AddPostUploadPhotoScreen', { onPhotoSelected: handlePhotoSelected })} 
+//                     />
+//                     <GradualButton title="Back" onPress={() => navigation.goBack()} />
+//                 </View>
+//             </TouchableWithoutFeedback>
 
 const styles = StyleSheet.create({
     container: {

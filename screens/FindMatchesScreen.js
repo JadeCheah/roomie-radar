@@ -99,7 +99,6 @@ const FindMatchesScreen = ({navigation}) => {
             }
             
             console.log(`${gender} & ${housing} extracted from user document`);
-
             const usersRef = collection(firestore, "users");
             const q = query(usersRef,
                 where("gender", "==", gender),

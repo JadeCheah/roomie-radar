@@ -84,13 +84,9 @@ const PreferencesProvider = ({ children }) => {
             } else {
                 setLoading(false);
             }
-        };
-
-        loadPreferences();
+        };        loadPreferences();
 
     }, [auth.currentUser]);
-
-
     const updateTempPreferences = (newPreferences) => {
         setTempPreferences((prevPreferences) => ({
             ...prevPreferences,
