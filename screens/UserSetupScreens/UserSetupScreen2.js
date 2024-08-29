@@ -12,6 +12,7 @@ import Slider from '@react-native-community/slider';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { windowWidth } from '../../utils/Dimensions';
 import { CommonActions } from '@react-navigation/native';
+//breakpoint for trying to push after final submission node_module issue 
 
 
 const UserSetupScreen2 = ({ navigation }) => {
