@@ -63,6 +63,16 @@ If you want to set up the app for development or testing:
 6. **Run on Your Device**
     - Use the Expo Go app to scan the QR code shown in your terminal to load the app on your device.
 
+## Project Report
+
+For more details about the project, including:
+
+- **Technology Stack**: Built with React Native, Expo, Firebase for authentication, and Firestore for database management.
+- **Testing Methods**: Unit tests and manual testing for core features, including user authentication, profile management, and in-app messaging.
+- **Challenges and Solutions**: Handling user state management, real-time updates, and optimizing performance for mobile platforms.
+
+You can read the full [Project Report](./ProjectReport_RoomieRadar.pdf) for a deeper dive into the development process.
+
 ## Contact
 
 For any issues or inquiries, please reach out to:
