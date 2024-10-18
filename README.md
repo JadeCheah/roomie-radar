@@ -71,7 +71,7 @@ For more details about the project, including:
 - **Testing Methods**: Unit tests and manual testing for core features, including user authentication, profile management, and in-app messaging.
 - **Challenges and Solutions**: Handling user state management, real-time updates, and optimizing performance for mobile platforms.
 
-You can read the full [Project Report](./ProjectReport_RoomieRadar.pdf) for a deeper dive into the development process.
+You can read the full [Project Report](https://drive.google.com/file/d/17EMNzqUBvisW5pm9gYBWHzREL5KMeyFq/view?usp=sharing) for a deeper dive into the development process.
 
 ## Contact
 
