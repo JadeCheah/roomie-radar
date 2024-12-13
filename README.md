@@ -24,7 +24,7 @@ If you just want to quickly run the app:
    - [Expo Go for Android](https://play.google.com/store/apps/details?id=host.exp.exponent&hl=en&gl=US)
 
 2. **Scan the QR Code**  
-   After downloading the Expo Go app, scan the QR code provided in the [Expo link here](https://expo.dev/preview/update?message=Milestone3.v1&updateRuntimeVersion=1.0.0&createdAt=2024-07-29T06%3A52%3A01.915Z&slug=exp&projectId=83f10503-a595-42e4-b630-43ba737e56af&group=36e0f1c0-b345-423b-8803-f107c3c588a3) with your device camera or within the Expo Go app.
+   After downloading the Expo Go app, scan the QR code provided in the [Expo link here](https://expo.dev/preview/update?message=upgrade%20to%20SDK%2052.0.0&updateRuntimeVersion=1.0.0&createdAt=2024-12-13T11%3A09%3A30.403Z&slug=exp&projectId=83f10503-a595-42e4-b630-43ba737e56af&group=3a34fca1-aafc-4bb0-b21f-3ea630c8edb1) with your device camera or within the Expo Go app.
 
 3. **Enjoy the App!**
 
